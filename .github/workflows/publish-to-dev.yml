@@ -1,0 +1,101 @@
+name: Deploy to development environment
+
+on:
+  workflow_run:
+    workflows: ['Publish Docker image to development environment']
+    types:
+      - completed
+  push:
+    branches:
+      - ci/dev
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Ignore'
+        required: false
+        type: boolean
+
+env:
+  K8S_NAMESPACE: development
+  K8S_DEPLOYMENT: self-hosting-be
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: detrip-dev
+
+jobs:
+  build-dev:
+    name: Build and push image to ECR
+    runs-on: ubuntu-latest
+
+    outputs:
+      tag_name: ${{ steps.last_release.outputs.tag_name }}
+      registry: ${{ steps.login_ecr.outputs.registry }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials DEV organization
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: us-east-1
+          mask-aws-account-id: 'false'
+
+      - name: 'Get Latest Released'
+        id: last_release
+        uses: InsonusK/get-latest-release@v1.0.1
+        with:
+          myToken: ${{ github.token }}
+          view_top: 1
+
+      - name: Login to Amazon ECR in DEV organization
+        id: login_ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push the image to Amazon ECR in DEV organization
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login_ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+          IMAGE_TAG: ${{ steps.last_release.outputs.tag_name }}-${{ github.sha }}-dev
+        run: |
+          # Build the docker image
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+          # Tag the image with two tags:
+          # 1. Based on the release version (v0.0.2)
+          # 2. Tag it with "latest"
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+          # Push both images to ECR
+          echo "Pushing image to ECR with version tag..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+          echo "Pushing image to ECR with latest tag...."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+          # Set outputs for further steps if necessary
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG-${GITHUB_REF##*/}"
+          echo "::set-output name=image_latest::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+  deploy-dev:
+    runs-on: ubuntu-latest
+    name: Deploy to DEV
+    needs: build-dev
+    steps:
+      - name: Deploy
+        uses: safe2008/eks-actions@v0.0.4
+        env:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws_region: us-east-1
+          cluster_name: detrip-dev
+          ECR_REGISTRY: ${{ needs.build-dev.outputs.registry }} # Corrected
+          ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+
+        with:
+          args: |
+            kubectl set image deployment $K8S_DEPLOYMENT -n $K8S_NAMESPACE $K8S_DEPLOYMENT=$ECR_REGISTRY/$ECR_REPOSITORY:${{ needs.build-dev.outputs.tag_name }}-${{ github.sha }}-dev ||
+            kubectl rollout restart deployment/$K8S_DEPLOYMENT -n $K8S_NAMESPACE ||
+            kubectl rollout status deployment/$K8S_DEPLOYMENT -n $K8S_NAMESPACE
