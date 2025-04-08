@@ -12,4 +12,8 @@ export class LoginResDto {
   @ClassField(() => UserResDto)
   @Expose()
   user!: WrapperType<UserResDto>;
+
+  @StringField()
+  @Expose()
+  accessToken!: string;
 }

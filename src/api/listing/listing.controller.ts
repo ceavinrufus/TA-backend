@@ -109,7 +109,7 @@ export class ListingController {
     isPaginated: true,
   })
   async findAllByHost(
-    @CurrentUser('user_token_id') hostId: Uuid,
+    @CurrentUser('id') hostId: Uuid,
     @Query() reqDto: ListListingReqDto,
   ): Promise<OffsetPaginatedDto<ListingResDto>> {
     return await this.listingService.findAllByHost(hostId, reqDto);
@@ -121,7 +121,7 @@ export class ListingController {
     summary: 'Get host aggregates',
   })
   async getHostAggregates(
-    @CurrentUser('user_token_id') hostId: Uuid,
+    @CurrentUser('id') hostId: Uuid,
   ): Promise<ListingAggregateResDto> {
     return await this.listingService.getHostAggregates(hostId);
   }

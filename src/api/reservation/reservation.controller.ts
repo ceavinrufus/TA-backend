@@ -121,7 +121,7 @@ export class ReservationController {
     isPaginated: true,
   })
   async findAllByHost(
-    @CurrentUser('user_token_id') host_id: Uuid,
+    @CurrentUser('id') host_id: Uuid,
     @Query() reqDto: ListReservationReqDto,
   ): Promise<OffsetPaginatedDto<ReservationResDto>> {
     return await this.reservationService.findAllByHost(host_id, reqDto);
@@ -133,7 +133,7 @@ export class ReservationController {
       'Get the number of guests checking in and out today for a specific host',
   })
   async getGuestsCheckingInAndOutTodayForHost(
-    @CurrentUser('user_token_id') host_id: Uuid,
+    @CurrentUser('id') host_id: Uuid,
   ): Promise<{ check_ins: number; check_outs: number }> {
     return await this.reservationService.getGuestsCheckingInAndOutTodayForHost(
       host_id,
@@ -144,7 +144,7 @@ export class ReservationController {
   @ApiAuth({
     summary: 'Get earnings statistics for a host',
   })
-  async getHostEarnings(@CurrentUser('user_token_id') host_id: Uuid): Promise<{
+  async getHostEarnings(@CurrentUser('id') host_id: Uuid): Promise<{
     pending_earnings: number;
     monthly_earnings: number;
     yearly_earnings: number;

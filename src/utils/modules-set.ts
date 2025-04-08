@@ -1,4 +1,5 @@
 import { ApiModule } from '@/api/api.module';
+import authConfig from '@/api/auth/config/auth.config';
 import { BackgroundModule } from '@/background/background.module';
 import appConfig from '@/config/app.config';
 import { AllConfigType } from '@/config/config.type';
@@ -20,7 +21,7 @@ function generateModulesSet() {
   const imports: ModuleMetadata['imports'] = [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, redisConfig],
+      load: [appConfig, databaseConfig, authConfig, redisConfig],
       envFilePath: ['.env'],
     }),
   ];

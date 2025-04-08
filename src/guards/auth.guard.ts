@@ -60,10 +60,13 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Access token is required');
     }
 
-    // Validate JWT token
-    request['user'] = await this.authService.verifyAccessToken(accessToken);
-
-    return true;
+    try {
+      // Validate JWT token using jose in the authService
+      request.user = await this.authService.verifyAccessToken(accessToken);
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

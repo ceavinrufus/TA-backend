@@ -36,9 +36,7 @@ export class UserController {
     summary: 'Get current user',
   })
   @Get('me')
-  async getCurrentUser(
-    @CurrentUser('user_token_id') userId: Uuid,
-  ): Promise<UserResDto> {
+  async getCurrentUser(@CurrentUser('id') userId: Uuid): Promise<UserResDto> {
     return await this.userService.findOne(userId);
   }
 
@@ -88,7 +86,7 @@ export class UserController {
 
   @Get('me/stats')
   @ApiAuth({ summary: 'Get user stats' })
-  async getUserStats(@CurrentUser('user_token_id') userId: Uuid) {
+  async getUserStats(@CurrentUser('id') userId: Uuid) {
     console.log('id', userId);
     return await this.userService.getUserStats(userId);
   }
