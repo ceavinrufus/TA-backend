@@ -107,7 +107,7 @@ export class ListingService {
         'prices',
         'prices.listing_id = listing.id',
       )
-      .leftJoinAndSelect('listing.user', 'user')
+      .leftJoinAndSelect('listing.host', 'host')
       .leftJoinAndSelect('listing.availabilities', 'availabilities')
       .where('listing.deleted_at IS NULL')
       .andWhere('listing.status = :status', {
@@ -436,7 +436,7 @@ export class ListingService {
     // Query to find the listing and check availability in one go
     const query = this.listingRepository
       .createQueryBuilder('listing')
-      .leftJoinAndSelect('listing.user', 'user')
+      .leftJoinAndSelect('listing.host', 'host')
       .leftJoinAndSelect('listing.prices', 'prices')
       .leftJoinAndSelect('listing.availabilities', 'availabilities')
       .where('listing.slug = :slug', { slug })
@@ -694,7 +694,7 @@ export class ListingService {
   ): Promise<OffsetPaginatedDto<ListingResDto>> {
     const query = this.listingRepository
       .createQueryBuilder('listing')
-      .leftJoinAndSelect('listing.user', 'user')
+      .leftJoinAndSelect('listing.host', 'host')
       .leftJoinAndSelect('listing.reservations', 'reservations')
       .leftJoinAndSelect('listing.prices', 'prices')
       .leftJoinAndSelect('listing.availabilities', 'availabilities')
@@ -722,7 +722,7 @@ export class ListingService {
 
     const query = this.listingRepository
       .createQueryBuilder('listing')
-      .leftJoinAndSelect('listing.user', 'user')
+      .leftJoinAndSelect('listing.host', 'host')
       .leftJoinAndSelect('listing.reservations', 'reservations')
       .leftJoinAndSelect('listing.prices', 'prices')
       .leftJoinAndSelect('listing.availabilities', 'availabilities')
@@ -751,7 +751,7 @@ export class ListingService {
 
     const query = this.listingRepository
       .createQueryBuilder('listing')
-      .leftJoinAndSelect('listing.user', 'user')
+      .leftJoinAndSelect('listing.host', 'host')
       .leftJoinAndSelect('listing.reservations', 'reservations')
       .leftJoinAndSelect('listing.prices', 'prices')
       .leftJoinAndSelect('listing.availabilities', 'availabilities')
@@ -837,7 +837,7 @@ export class ListingService {
   ): Promise<CursorPaginatedDto<ListingResDto>> {
     const queryBuilder = this.listingRepository
       .createQueryBuilder('listing')
-      .leftJoinAndSelect('listing.user', 'user')
+      .leftJoinAndSelect('listing.host', 'host')
       .leftJoinAndSelect('listing.reservations', 'reservations')
       .leftJoinAndSelect('listing.prices', 'prices')
       .leftJoinAndSelect('listing.availabilities', 'availabilities')
@@ -875,7 +875,7 @@ export class ListingService {
 
     const listing = await this.listingRepository.findOne({
       where: { id },
-      relations: ['user', 'reservations', 'prices', 'availabilities'],
+      relations: ['host', 'reservations', 'prices', 'availabilities'],
     });
 
     if (!listing) {
@@ -892,7 +892,7 @@ export class ListingService {
 
     const listing = await this.listingRepository.findOne({
       where: { slug },
-      relations: ['user', 'reservations', 'prices', 'availabilities'],
+      relations: ['host', 'reservations', 'prices', 'availabilities'],
     });
 
     if (!listing) {
