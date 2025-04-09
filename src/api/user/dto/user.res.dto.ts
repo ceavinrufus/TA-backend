@@ -38,6 +38,14 @@ export class UserResDto {
 
   @BooleanField()
   @Expose()
+  is_host: boolean;
+
+  @BooleanField()
+  @Expose()
+  is_admin: boolean;
+
+  @BooleanField()
+  @Expose()
   is_profile_complete: boolean;
 
   @BooleanField()

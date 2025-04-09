@@ -195,7 +195,6 @@ export class UserService {
       totalReservations,
       totalListings,
       totalEarnings: totalEarnings?.total || 0,
-      securityDeposit: 0, // TODO: Fetch from smart contract
     };
   }
 

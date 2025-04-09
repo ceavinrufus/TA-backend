@@ -23,4 +23,10 @@ export class CreateUserReqDto {
 
   @BooleanFieldOptional()
   is_anonymous?: boolean;
+
+  @BooleanFieldOptional()
+  is_host?: boolean;
+
+  @BooleanFieldOptional()
+  is_admin?: boolean;
 }

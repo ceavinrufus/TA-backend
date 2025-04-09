@@ -44,6 +44,12 @@ export class UserEntity extends AbstractEntity {
   @Column({ default: false })
   is_anonymous: boolean;
 
+  @Column({ default: false })
+  is_host: boolean;
+
+  @Column({ default: false })
+  is_admin: boolean;
+
   @DeleteDateColumn({
     name: 'deleted_at',
     type: 'timestamptz',
