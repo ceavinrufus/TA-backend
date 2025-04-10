@@ -1,4 +1,5 @@
 import {
+  BooleanFieldOptional,
   ClassFieldOptional,
   DateFieldOptional,
   NumberFieldOptional,
@@ -21,6 +22,9 @@ export class CheckPriceDto {
 
   @ClassFieldOptional(() => GuestDto)
   guests?: GuestDto;
+
+  @BooleanFieldOptional({ default: true })
+  use_cache?: boolean;
 
   // @StringFieldOptional()
   // currency?: string;

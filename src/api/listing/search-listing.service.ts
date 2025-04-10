@@ -3,7 +3,8 @@ import { ListingStatus, ReservationStatus } from '@/constants/entity.enum';
 import { ErrorCode } from '@/constants/error-code.constant';
 import { ValidationException } from '@/exceptions/validation.exception';
 import { paginate } from '@/utils/offset-pagination';
-import { Injectable, Logger } from '@nestjs/common';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import assert from 'assert';
 import { plainToInstance } from 'class-transformer';
@@ -24,9 +25,26 @@ export class SearchListingService {
   constructor(
     @InjectRepository(ListingEntity)
     private readonly listingRepository: Repository<ListingEntity>,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
 
   async search(dto: SearchListingDto) {
+    const use_cache = dto.use_cache !== false; // Default to true if not specified
+
+    // Check Redis cache first if caching is enabled
+    if (use_cache) {
+      const cachedResults = await this.getCachedSearch(dto);
+      if (cachedResults) {
+        this.logger.log('Cache hit for search');
+        return cachedResults;
+      } else {
+        this.logger.log('Cache miss for search');
+      }
+    }
+
+    const cacheKey = this.getSearchCacheKey(dto);
+
     // Set default check-in and check-out dates
     const today = new Date();
     const tomorrow = new Date();
@@ -353,7 +371,38 @@ export class SearchListingService {
       }),
     );
 
-    return new OffsetPaginatedDto(resultListings, metaDto);
+    const result = new OffsetPaginatedDto(resultListings, metaDto);
+
+    // Store the result in Redis cache if caching is enabled
+    if (use_cache) {
+      await this.cacheManager.set(
+        cacheKey,
+        JSON.stringify(result),
+        3600 * 1000,
+      ); // Cache for 1 hour
+    }
+
+    return result;
+  }
+
+  private getSearchCacheKey(dto: SearchListingDto): string {
+    const filters = JSON.stringify(dto.filters || {});
+    const params = JSON.stringify(dto.params || {});
+    const pagination = JSON.stringify(dto.pagination || {});
+    return `search:${filters}:${params}:${pagination}`;
+  }
+
+  async getCachedSearch(
+    dto: SearchListingDto,
+  ): Promise<OffsetPaginatedDto<SearchListingResDto> | null> {
+    const cacheKey = this.getSearchCacheKey(dto);
+    const cachedSearchResults = await this.cacheManager.get(cacheKey);
+    if (cachedSearchResults) {
+      this.logger.log(`Cache hit for search check: ${cacheKey}`);
+      return JSON.parse(cachedSearchResults as string);
+    }
+    this.logger.log(`Cache miss for search check: ${cacheKey}`);
+    return null;
   }
 
   async checkAvailability(
@@ -361,6 +410,7 @@ export class SearchListingService {
     startDate: Date,
     endDate: Date,
     guests?: { adults?: number; children?: number[] },
+    use_cache: boolean = true, // Optional parameter to control caching
   ): Promise<SearchListingResDto> {
     assert(slug, 'Listing slug is required');
     assert(startDate, 'Start date is required');
@@ -376,6 +426,21 @@ export class SearchListingService {
     const today = new Date();
     const now = new Date();
     const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+    // Check Redis cache first if caching is enabled
+    if (use_cache) {
+      const cachedAvailability = await this.getCachedAvailability(
+        slug,
+        startDate,
+        endDate,
+      );
+      if (cachedAvailability) {
+        this.logger.log(`Cache hit for availability: ${slug}`);
+        return cachedAvailability;
+      } else {
+        this.logger.log(`Cache miss for availability: ${slug}`);
+      }
+    }
 
     // Query to find the listing and check availability in one go
     const query = this.listingRepository
@@ -548,6 +613,7 @@ export class SearchListingService {
     const listing = await query.getOne();
 
     if (!listing) {
+      await this.cacheAvailability(slug, startDate, endDate, null);
       throw new ValidationException(
         ErrorCode.E001,
         'Listing not found or not available for the selected dates',
@@ -566,7 +632,7 @@ export class SearchListingService {
     }
 
     // Transform to response DTO with the calculated prices
-    return plainToInstance(
+    const result = plainToInstance(
       SearchListingResDto,
       {
         ...listing,
@@ -575,6 +641,13 @@ export class SearchListingService {
       },
       { excludeExtraneousValues: true },
     );
+
+    // Cache the availability result if caching is enabled
+    if (use_cache) {
+      await this.cacheAvailability(slug, startDate, endDate, result);
+    }
+
+    return result;
   }
 
   private getDateRange(startDate: Date, endDate: Date): Date[] {
@@ -598,5 +671,33 @@ export class SearchListingService {
     );
 
     return priceOverride?.price_override ?? listing.default_price ?? 0;
+  }
+
+  private async cacheAvailability(
+    slug: string,
+    startDate: Date,
+    endDate: Date,
+    availability: SearchListingResDto | null,
+  ): Promise<void> {
+    const key = `availability:${slug}:${startDate.toISOString()}:${endDate.toISOString()}`;
+    const value =
+      availability === null ? 'NOT_FOUND' : JSON.stringify(availability);
+    await this.cacheManager.set(key, value, 3600 * 1000); // Cache for 1 hour
+  }
+
+  private async getCachedAvailability(
+    slug: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<SearchListingResDto | null> {
+    const key = `availability:${slug}:${startDate.toISOString()}:${endDate.toISOString()}`;
+    const cachedData = await this.cacheManager.get(key);
+    if (cachedData === 'NOT_FOUND') {
+      throw new ValidationException(
+        ErrorCode.E001,
+        'Listing not found or not available for the selected dates',
+      );
+    }
+    return cachedData ? JSON.parse(cachedData as string) : null;
   }
 }

@@ -120,4 +120,7 @@ export class SearchListingDto {
 
   @ClassFieldOptional(() => ParamsDto)
   params?: ParamsDto;
+
+  @BooleanFieldOptional({ default: true })
+  use_cache?: boolean;
 }

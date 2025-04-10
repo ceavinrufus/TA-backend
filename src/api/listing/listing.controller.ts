@@ -77,6 +77,7 @@ export class ListingController {
       reqDto.startDate,
       reqDto.endDate,
       reqDto.guests,
+      reqDto.use_cache,
     );
   }
 
