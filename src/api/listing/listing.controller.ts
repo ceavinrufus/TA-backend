@@ -26,6 +26,7 @@ import { SearchListingDto } from './dto/search-listing.req.dto';
 import { SearchListingResDto } from './dto/search-listing.res.dto';
 import { UpdateListingDto } from './dto/update-listing.req.dto';
 import { ListingService } from './listing.service';
+import { SearchListingService } from './search-listing.service';
 
 @ApiTags('listings')
 @Controller({
@@ -33,7 +34,10 @@ import { ListingService } from './listing.service';
   version: '1',
 })
 export class ListingController {
-  constructor(private readonly listingService: ListingService) {}
+  constructor(
+    private readonly listingService: ListingService,
+    private readonly searchListingService: SearchListingService,
+  ) {}
 
   @Post()
   @ApiAuth({
@@ -56,7 +60,7 @@ export class ListingController {
   async search(
     @Body() searchListingDto: SearchListingDto,
   ): Promise<OffsetPaginatedDto<SearchListingResDto>> {
-    return await this.listingService.search(searchListingDto);
+    return await this.searchListingService.search(searchListingDto);
   }
 
   @Post(':slug/check-availability')
@@ -68,7 +72,7 @@ export class ListingController {
     @Param('slug') slug: string,
     @Body() reqDto: CheckPriceDto,
   ): Promise<SearchListingResDto> {
-    return await this.listingService.checkAvailability(
+    return await this.searchListingService.checkAvailability(
       slug,
       reqDto.startDate,
       reqDto.endDate,
