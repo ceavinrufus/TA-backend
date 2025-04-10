@@ -100,15 +100,6 @@ class ParamsDto {
 
   @StringFieldOptional()
   slug?: string;
-
-  // @StringFieldOptional()
-  // residency?: string;
-
-  // @StringFieldOptional()
-  // currency?: string;
-
-  // @StringFieldOptional()
-  // language?: string;
 }
 
 export class SearchListingDto {

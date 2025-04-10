@@ -17,10 +17,6 @@ export class PaymentResDto {
   @Expose()
   amount: number;
 
-  @StringField()
-  @Expose()
-  currency: string;
-
   @BooleanField()
   @Expose()
   is_successful: boolean;

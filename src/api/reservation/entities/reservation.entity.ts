@@ -73,9 +73,6 @@ export class ReservationEntity extends AbstractEntity {
   @Column('float', { nullable: true })
   service_fee: number;
 
-  @Column('varchar', { nullable: true })
-  currency: string;
-
   @JoinColumn({
     name: 'host_id',
     referencedColumnName: 'id',
@@ -114,8 +111,8 @@ export class ReservationEntity extends AbstractEntity {
   @Column('jsonb', { default: [] })
   guest_info: string[];
 
-  @Column('json', { nullable: true })
-  user_billing_detail: string;
+  @Column('varchar', { nullable: true })
+  guest_wallet_address: string;
 
   @Column({
     type: 'enum',

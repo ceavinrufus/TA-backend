@@ -73,8 +73,7 @@ export class PriceService {
   }
 
   async create(dto: CreatePriceDto): Promise<PriceResDto> {
-    const { price_override, currency, type, start_date, end_date, listing_id } =
-      dto;
+    const { price_override, type, start_date, end_date, listing_id } = dto;
 
     // Check for uniqueness based on composite key
     const existingPrice = await this.priceRepository.findOne({
@@ -87,7 +86,6 @@ export class PriceService {
 
     const newPrice = new PriceEntity({
       price_override,
-      currency,
       type,
       start_date,
       end_date,

@@ -13,9 +13,6 @@ export class CreatePriceDto {
   @NumberField({ isPositive: true })
   price_override: number;
 
-  @StringField()
-  currency: string;
-
   @StringField({ maxLength: 50 })
   type: string;
 

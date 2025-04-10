@@ -16,10 +16,6 @@ export class PriceResDto {
   @Expose()
   price_override: number;
 
-  @StringField()
-  @Expose()
-  currency: string;
-
   @StringField({ maxLength: 50 })
   @Expose()
   type: string;

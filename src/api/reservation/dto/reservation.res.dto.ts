@@ -12,7 +12,7 @@ import {
   StringField,
   UUIDField,
 } from '@/decorators/field.decorators';
-import { Expose, Transform } from 'class-transformer';
+import { Expose } from 'class-transformer';
 
 export class ReservationResDto {
   @UUIDField()
@@ -63,10 +63,6 @@ export class ReservationResDto {
   @Expose()
   service_fee: number;
 
-  @StringField()
-  @Expose()
-  currency: string;
-
   @NumberField({ int: true })
   @Expose()
   night_staying: number;
@@ -91,12 +87,9 @@ export class ReservationResDto {
   @Expose()
   guest_info: object[];
 
-  @JSONField()
-  @Transform(({ value }) => {
-    return typeof value === 'string' ? JSON.parse(value) : value;
-  })
+  @StringField()
   @Expose()
-  user_billing_detail: any;
+  guest_wallet_address: string;
 
   @EnumField(() => ReservationStatus)
   @Expose()

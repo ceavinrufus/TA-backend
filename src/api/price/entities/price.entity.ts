@@ -41,9 +41,6 @@ export class PriceEntity extends AbstractEntity {
   @Column({ type: 'float' })
   price_override: number;
 
-  @Column({ type: 'varchar' })
-  currency: string;
-
   @Column({ type: 'varchar', length: 50 })
   type: string;
 }

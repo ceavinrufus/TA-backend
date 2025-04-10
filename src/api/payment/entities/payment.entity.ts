@@ -24,9 +24,6 @@ export class PaymentEntity extends AbstractEntity {
   @Column({ type: 'float' })
   amount: number;
 
-  @Column('varchar')
-  currency: string;
-
   @Column({ type: 'boolean', default: false })
   is_successful: boolean;
 

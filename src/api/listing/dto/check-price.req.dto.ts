@@ -25,10 +25,4 @@ export class CheckPriceDto {
 
   @BooleanFieldOptional({ default: true })
   use_cache?: boolean;
-
-  // @StringFieldOptional()
-  // currency?: string;
-
-  // @NumberFieldOptional()
-  // region_id?: number;
 }

@@ -37,38 +37,6 @@ export class UserOrderInfoDto {
   title?: string;
 }
 
-export class UserBillingDetailDto {
-  @StringFieldOptional()
-  email?: string;
-
-  @StringFieldOptional()
-  phone?: string;
-
-  @StringFieldOptional()
-  first_name?: string;
-
-  @StringFieldOptional()
-  last_name?: string;
-
-  @StringFieldOptional()
-  country?: string;
-
-  @StringFieldOptional()
-  city?: string;
-
-  @StringFieldOptional()
-  address?: string;
-
-  @StringFieldOptional()
-  company_name?: string;
-
-  @StringFieldOptional()
-  vat_number?: string;
-
-  @StringFieldOptional()
-  wallet_address?: string;
-}
-
 export class CreateReservationDto {
   @UUIDField()
   listing_id: Uuid; // Required field
@@ -91,9 +59,6 @@ export class CreateReservationDto {
   @NumberFieldOptional()
   service_fee: number;
 
-  @StringFieldOptional()
-  currency: string;
-
   @NumberFieldOptional()
   night_staying?: number;
 
@@ -115,8 +80,8 @@ export class CreateReservationDto {
   })
   guest_info?: UserOrderInfoDto[];
 
-  @ClassFieldOptional(() => UserBillingDetailDto)
-  user_billing_detail?: UserBillingDetailDto;
+  @StringFieldOptional()
+  guest_wallet_address?: string;
 
   @EnumFieldOptional(() => ReservationStatus)
   status?: ReservationStatus;
