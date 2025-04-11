@@ -1,6 +1,7 @@
 import {
   ClassSerializerInterceptor,
   HttpStatus,
+  RequestMethod,
   UnprocessableEntityException,
   ValidationError,
   ValidationPipe,
@@ -52,8 +53,8 @@ async function bootstrap() {
     configService.getOrThrow('app.apiPrefix', { infer: true }),
     {
       exclude: [
-        // { method: RequestMethod.GET, path: '/' },
-        // { method: RequestMethod.GET, path: 'health' },
+        { method: RequestMethod.GET, path: '/' },
+        { method: RequestMethod.GET, path: 'health' },
       ],
     },
   );
@@ -79,10 +80,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
 
   if (isDevelopment) {
-    setupSwagger(
-      app,
-      configService.getOrThrow('app.apiPrefix', { infer: true }),
-    );
+    setupSwagger(app);
   }
 
   await app.listen(configService.getOrThrow('app.port', { infer: true }));
