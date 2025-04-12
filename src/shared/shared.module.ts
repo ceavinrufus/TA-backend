@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common';
-import { IdentityModule } from './identity/identity.module';
+import { PolygonIdModule } from './polygon-id/polygon-id.module';
 
 @Global()
 @Module({
-  imports: [IdentityModule],
+  imports: [PolygonIdModule],
 })
 export class SharedModule {}

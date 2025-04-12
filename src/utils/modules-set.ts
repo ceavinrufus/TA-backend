@@ -7,7 +7,7 @@ import databaseConfig from '@/database/config/database.config';
 import { TypeOrmConfigService } from '@/database/typeorm-config.service';
 import { MailModule } from '@/mail/mail.module';
 import redisConfig from '@/redis/config/redis.config';
-import identityConfig from '@/shared/identity/config/identity-config';
+import polygonIdConfig from '@/shared/polygon-id/config/polygon-id-config';
 import { SharedModule } from '@/shared/shared.module';
 import { BullModule } from '@nestjs/bullmq';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -28,7 +28,7 @@ function generateModulesSet() {
         databaseConfig,
         authConfig,
         redisConfig,
-        identityConfig,
+        polygonIdConfig,
       ],
       envFilePath: ['.env'],
     }),

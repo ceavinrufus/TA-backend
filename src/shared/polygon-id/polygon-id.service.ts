@@ -10,8 +10,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class IdentityService {
-  private issuerDID: string;
+export class PolygonIdService {
+  private issuerDID: core.DID;
 
   constructor(
     @Inject('DataStorage') private dataStorage: IDataStorage,
@@ -24,7 +24,7 @@ export class IdentityService {
     });
   }
 
-  async initializeIssuerDID(): Promise<string> {
+  async initializeIssuerDID(): Promise<core.DID> {
     // Initialize the issuer DID
     console.log('=============== Initializing Issuer DID ===============');
 
@@ -34,12 +34,28 @@ export class IdentityService {
       networkId: core.NetworkId.Amoy,
       revocationOpts: {
         type: CredentialStatusType.Iden3ReverseSparseMerkleTreeProof,
-        id: this.configService.getOrThrow('identity.rhsUrl', { infer: true }),
+        id: this.configService.getOrThrow('polygonId.rhsUrl', { infer: true }),
       },
     });
 
     console.log('Issuer DID:', issuerDID.string());
 
-    return issuerDID.string();
+    return issuerDID;
+  }
+
+  getIssuerDID(): core.DID {
+    return this.issuerDID;
+  }
+  getCredentialWallet(): ICredentialWallet {
+    return this.credentialWallet;
+  }
+  getIdentityWallet(): IIdentityWallet {
+    return this.identityWallet;
+  }
+  getDataStorage(): IDataStorage {
+    return this.dataStorage;
+  }
+  getCredentialStatusType(): CredentialStatusType {
+    return CredentialStatusType.Iden3ReverseSparseMerkleTreeProof;
   }
 }

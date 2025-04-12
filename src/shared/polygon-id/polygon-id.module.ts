@@ -28,7 +28,7 @@ import {
 } from '@0xpolygonid/js-sdk';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { IdentityService } from './identity.service';
+import { PolygonIdService } from './polygon-id.service';
 
 @Module({
   providers: [
@@ -36,10 +36,10 @@ import { IdentityService } from './identity.service';
       provide: 'DataStorage',
       useFactory: (config: ConfigService<AllConfigType>): IDataStorage => {
         const conf: EthConnectionConfig = defaultEthConnectionConfig;
-        conf.contractAddress = config.get('identity.stateContractAddress', {
+        conf.contractAddress = config.get('polygonId.stateContractAddress', {
           infer: true,
         });
-        conf.url = config.get('identity.rpcUrl', {
+        conf.url = config.get('polygonId.rpcUrl', {
           infer: true,
         });
 
@@ -102,13 +102,13 @@ import { IdentityService } from './identity.service';
       },
       inject: ['DataStorage', 'CredentialWallet'],
     },
-    IdentityService,
+    PolygonIdService,
   ],
   exports: [
     'DataStorage',
     'CredentialWallet',
     'IdentityWallet',
-    IdentityService,
+    PolygonIdService,
   ],
 })
-export class IdentityModule {}
+export class PolygonIdModule {}

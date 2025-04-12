@@ -1,4 +1,4 @@
-export type IdentityConfig = {
+export type PolygonIdConfig = {
   walletKey?: string;
   rpcUrl: string;
   rhsUrl: string;

@@ -2,7 +2,7 @@ import { registerAs } from '@nestjs/config';
 
 import { IsNotEmpty, IsString } from 'class-validator';
 import validateConfig from '../../../utils/validate-config';
-import { IdentityConfig } from './identity-config.type';
+import { PolygonIdConfig } from './polygon-id-config.type';
 
 class EnvironmentVariablesValidator {
   @IsString()
@@ -34,8 +34,8 @@ class EnvironmentVariablesValidator {
   CHAIN_ID: string;
 }
 
-export default registerAs<IdentityConfig>('identity', () => {
-  console.info(`Register IdentityConfig from environment variables`);
+export default registerAs<PolygonIdConfig>('polygonId', () => {
+  console.info(`Register PolygonIdConfig from environment variables`);
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {
