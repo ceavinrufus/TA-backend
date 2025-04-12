@@ -23,20 +23,12 @@ import { PriceEntity } from './entities/price.entity';
 @Injectable()
 export class PriceService {
   private readonly logger = new Logger(PriceService.name);
-  private readonly coinmarketcapApiKey: string;
 
   constructor(
     @InjectRepository(PriceEntity)
     private readonly priceRepository: Repository<PriceEntity>,
     private readonly configService: ConfigService<AllConfigType>,
-  ) {
-    this.coinmarketcapApiKey = this.configService.get<string>(
-      'app.coinmarketcapApiKey',
-      {
-        infer: true,
-      },
-    );
-  }
+  ) {}
 
   async fetchExchangeRate(
     from_currency: string,

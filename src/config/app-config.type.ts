@@ -10,5 +10,4 @@ export type AppConfig = {
   logService: string;
   corsOrigin: boolean | string | RegExp | (string | RegExp)[];
   apiKey: string;
-  coinmarketcapApiKey: string;
 };
