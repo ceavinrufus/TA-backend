@@ -3,6 +3,7 @@ import { W3CCredential } from '@0xpolygonid/js-sdk';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { IssueCredentialReqDto } from './dto/issue-credential.req.dto';
+import { IdentityService } from './identity.service';
 import { IssuerService } from './issuer.service';
 
 @ApiTags('identity')
@@ -11,7 +12,26 @@ import { IssuerService } from './issuer.service';
   version: '1',
 })
 export class IdentityController {
-  constructor(private readonly issuerService: IssuerService) {}
+  constructor(
+    private readonly issuerService: IssuerService,
+    private readonly identityService: IdentityService,
+  ) {}
+
+  @Get(':id')
+  @ApiPublic({
+    summary: 'Get the fetch request',
+  })
+  getFetchRequest(@Param('id') id: string) {
+    return this.identityService.getFetchRequest(id);
+  }
+
+  @Post('credentials/:id')
+  @ApiPublic({
+    summary: 'Serve the full W3C credential',
+  })
+  async getCredential(@Param('id') id: string) {
+    return this.identityService.getCredential(id);
+  }
 
   @Post('issuer/issue-credential')
   @ApiPublic({
@@ -30,21 +50,5 @@ export class IdentityController {
       credentialSchema,
       expiration,
     );
-  }
-
-  @Get(':id')
-  @ApiPublic({
-    summary: 'Get the fetch request',
-  })
-  getFetchRequest(@Param('id') id: string) {
-    return this.issuerService.getFetchRequest(id);
-  }
-
-  @Post('credentials/:id')
-  @ApiPublic({
-    summary: 'Serve the full W3C credential',
-  })
-  async getCredential(@Param('id') id: string) {
-    return this.issuerService.getCredential(id);
   }
 }
