@@ -3,8 +3,8 @@ import { W3CCredential } from '@0xpolygonid/js-sdk';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { IssueCredentialReqDto } from './dto/issue-credential.req.dto';
-import { IdentityService } from './identity.service';
 import { IssuerService } from './issuer.service';
+import { VerifierService } from './verifier.service';
 
 @ApiTags('identity')
 @Controller({
@@ -14,25 +14,40 @@ import { IssuerService } from './issuer.service';
 export class IdentityController {
   constructor(
     private readonly issuerService: IssuerService,
-    private readonly identityService: IdentityService,
+    private readonly verifierService: VerifierService,
   ) {}
 
+  /**
+   * Retrieves a fetch request for a given identity ID
+   * @param id - The unique identifier for the fetch request
+   * @returns The fetch request details
+   */
   @Get(':id')
   @ApiPublic({
     summary: 'Get the fetch request',
   })
   getFetchRequest(@Param('id') id: string) {
-    return this.identityService.getFetchRequest(id);
+    return this.issuerService.getFetchRequest(id);
   }
 
+  /**
+   * Retrieves a W3C credential for a given credential ID
+   * @param id - The unique identifier for the credential
+   * @returns The full W3C credential
+   */
   @Post('credentials/:id')
   @ApiPublic({
     summary: 'Serve the full W3C credential',
   })
   async getCredential(@Param('id') id: string) {
-    return this.identityService.getCredential(id);
+    return this.issuerService.getCredential(id);
   }
 
+  /**
+   * Issues a new W3C verifiable credential
+   * @param dto - The credential issuance request data containing subject, type, schema and expiration
+   * @returns Object containing the issued credential ID and universal link
+   */
   @Post('issuer/issue-credential')
   @ApiPublic({
     type: W3CCredential,

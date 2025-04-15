@@ -3,11 +3,9 @@ import {
   NumberFieldOptional,
   StringField,
 } from '@/decorators/field.decorators';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class IssueCredentialReqDto {
-  @JSONField()
-  @ApiProperty({
+  @JSONField({
     description: 'The credential subject containing the claims',
   })
   credentialSubject: string;
