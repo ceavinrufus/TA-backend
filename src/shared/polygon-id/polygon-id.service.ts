@@ -2,6 +2,8 @@ import { AllConfigType } from '@/config/config.type';
 import {
   core,
   CredentialStatusType,
+  // ICircuitStorage,
+  // ProofService,
   ICredentialWallet,
   IDataStorage,
   IIdentityWallet,
@@ -17,6 +19,8 @@ export class PolygonIdService {
     @Inject('DataStorage') private dataStorage: IDataStorage,
     @Inject('CredentialWallet') private credentialWallet: ICredentialWallet,
     @Inject('IdentityWallet') private identityWallet: IIdentityWallet,
+    // @Inject('CircuitStorage') private circuitStorage: ICircuitStorage,
+    // @Inject(ProofService) private proofService: ProofService,
     private readonly configService: ConfigService<AllConfigType>,
   ) {
     this.initializeIssuerDID().then((did) => {
@@ -55,6 +59,12 @@ export class PolygonIdService {
   getDataStorage(): IDataStorage {
     return this.dataStorage;
   }
+  // getCircuitStorage(): ICircuitStorage {
+  //   return this.circuitStorage;
+  // }
+  // getProofService(): ProofService {
+  //   return this.proofService;
+  // }
   getCredentialStatusType(): CredentialStatusType {
     return CredentialStatusType.Iden3ReverseSparseMerkleTreeProof;
   }

@@ -102,12 +102,61 @@ import { PolygonIdService } from './polygon-id.service';
       },
       inject: ['DataStorage', 'CredentialWallet'],
     },
+    // {
+    //   provide: 'CircuitStorage',
+    //   useFactory: async (
+    //     config: ConfigService<AllConfigType>,
+    //   ): Promise<ICircuitStorage> => {
+    //     const circuitDirectoryPath = path.join(
+    //       __dirname,
+    //       config.get('polygonId.circuitsPath', {
+    //         infer: true,
+    //       }),
+    //     );
+
+    //     return new FSCircuitStorage({
+    //       dirname: circuitDirectoryPath,
+    //     });
+    //   },
+    //   inject: [ConfigService],
+    // },
+    // {
+    //   provide: ProofService,
+    //   useFactory: async (
+    //     config: ConfigService<AllConfigType>,
+    //     identityWallet: IIdentityWallet,
+    //     credentialWallet: ICredentialWallet,
+    //     dataStorage: IDataStorage,
+    //     circuitStorage: ICircuitStorage,
+    //   ): Promise<ProofService> => {
+    //     return new ProofService(
+    //       identityWallet,
+    //       credentialWallet,
+    //       circuitStorage,
+    //       dataStorage.states,
+    //       {
+    //         ipfsGatewayURL: config.get('polygonId.ipfsUrl', {
+    //           infer: true,
+    //         }),
+    //       },
+    //     );
+    //   },
+    //   inject: [
+    //     ConfigService,
+    //     'IdentityWallet',
+    //     'CredentialWallet',
+    //     'DataStorage',
+    //     'CircuitStorage',
+    //   ],
+    // },
     PolygonIdService,
   ],
   exports: [
     'DataStorage',
     'CredentialWallet',
     'IdentityWallet',
+    // 'CircuitStorage',
+    // ProofService,
     PolygonIdService,
   ],
 })

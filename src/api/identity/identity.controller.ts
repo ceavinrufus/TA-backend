@@ -3,8 +3,10 @@ import { W3CCredential } from '@0xpolygonid/js-sdk';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { IssueCredentialReqDto } from './dto/issue-credential.req.dto';
+import { RequestProofReqDto } from './dto/request-proof.req.dto';
 import { IdentityService } from './identity.service';
 import { IssuerService } from './issuer.service';
+import { VerifierService } from './verifier.service';
 
 @ApiTags('identity')
 @Controller({
@@ -14,9 +16,15 @@ import { IssuerService } from './issuer.service';
 export class IdentityController {
   constructor(
     private readonly issuerService: IssuerService,
+    private readonly verifierService: VerifierService,
     private readonly identityService: IdentityService,
   ) {}
 
+  /**
+   * Retrieves a fetch request for a given identity ID
+   * @param id - The unique identifier for the fetch request
+   * @returns The fetch request details
+   */
   @Get(':id')
   @ApiPublic({
     summary: 'Get the fetch request',
@@ -25,6 +33,11 @@ export class IdentityController {
     return this.identityService.getFetchRequest(id);
   }
 
+  /**
+   * Retrieves a W3C credential for a given credential ID
+   * @param id - The unique identifier for the credential
+   * @returns The full W3C credential
+   */
   @Post('credentials/:id')
   @ApiPublic({
     summary: 'Serve the full W3C credential',
@@ -33,6 +46,11 @@ export class IdentityController {
     return this.identityService.getCredential(id);
   }
 
+  /**
+   * Issues a new W3C verifiable credential
+   * @param dto - The credential issuance request data containing subject, type, schema and expiration
+   * @returns Object containing the issued credential ID and universal link
+   */
   @Post('issuer/issue-credential')
   @ApiPublic({
     type: W3CCredential,
@@ -50,5 +68,23 @@ export class IdentityController {
       credentialSchema,
       expiration,
     );
+  }
+
+  /**
+   * Creates a zero-knowledge proof request
+   * @param query - The proof request parameters
+   * @returns Object containing the universal link for the proof request to be sent to the wallet
+   */
+  @Post('verifier/request-proof')
+  @ApiPublic({
+    summary: 'Request zero-knowledge proof',
+  })
+  async requestProof(
+    @Body() query: RequestProofReqDto,
+  ): Promise<{ universal_link: string }> {
+    return this.verifierService.requestProof({
+      ...query,
+      credentialSubject: JSON.parse(query.credentialSubject),
+    });
   }
 }

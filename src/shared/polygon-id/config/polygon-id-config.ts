@@ -26,7 +26,7 @@ class EnvironmentVariablesValidator {
   STATE_CONTRACT_ADDRESS: string;
 
   @IsString()
-  // @IsNotEmpty()
+  @IsNotEmpty()
   CIRCUITS_PATH: string;
 
   @IsString()

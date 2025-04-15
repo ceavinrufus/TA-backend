@@ -40,6 +40,7 @@ export class IdentityService {
 
     return credentialOffer;
   }
+
   // Function to retrieve and format credential by ID for wallet transmission
   async getCredential(id: string) {
     const credentialWallet = this.polygonIdService.getCredentialWallet();
