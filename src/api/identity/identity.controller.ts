@@ -1,7 +1,10 @@
 import { ApiPublic } from '@/decorators/http.decorators';
 import { W3CCredential } from '@0xpolygonid/js-sdk';
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { AuthorizationResponseMessage } from '@iden3/js-iden3-auth/dist/types/types-sdk';
+import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
+import getRawBody from 'raw-body';
 import { IssueCredentialReqDto } from './dto/issue-credential.req.dto';
 import { RequestProofReqDto } from './dto/request-proof.req.dto';
 import { IssuerService } from './issuer.service';
@@ -84,5 +87,25 @@ export class IdentityController {
       ...query,
       credentialSubject: JSON.parse(query.credentialSubject),
     });
+  }
+
+  /**
+   * Callback endpoint for proof verification
+   * @param sessionId - The unique session identifier
+   * @param body - The response body from the wallet
+   * @returns The authorization response message
+   */
+  @Post('verifier/callback')
+  @ApiPublic({
+    summary: 'Callback for proof verification',
+  })
+  async verificationCallback(
+    @Req() req: Request,
+    @Query('sessionId') sessionId: string,
+  ): Promise<AuthorizationResponseMessage> {
+    // Get JWZ token params from the post request
+    const raw = await getRawBody(req);
+    const tokenStr = raw.toString().trim();
+    return await this.verifierService.verificationCallback(sessionId, tokenStr);
   }
 }

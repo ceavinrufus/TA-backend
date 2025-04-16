@@ -70,7 +70,7 @@ export class IssuerService {
         },
       );
 
-    console.log('================= publish to blockchain ===================');
+    // console.log('================= publish to blockchain ===================');
 
     // Publish the state to the blockchain
     const ethSigner = new ethers.Wallet(

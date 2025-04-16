@@ -76,7 +76,4 @@ export class PolygonIdService {
   getProofService(): ProofService {
     return this.proofService;
   }
-  getCredentialStatusType(): CredentialStatusType {
-    return CredentialStatusType.Iden3ReverseSparseMerkleTreeProof;
-  }
 }

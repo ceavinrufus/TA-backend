@@ -1,11 +1,13 @@
 import { AllConfigType } from '@/config/config.type';
-import { PolygonIdService } from '@/shared/polygon-id/polygon-id.service';
 import {
   CircuitId,
   ZeroKnowledgeProofQuery,
   ZeroKnowledgeProofRequest,
 } from '@0xpolygonid/js-sdk';
-import { Injectable } from '@nestjs/common';
+import { auth, resolver } from '@iden3/js-iden3-auth';
+import { AuthorizationRequestMessage } from '@iden3/js-iden3-auth/dist/types/types-sdk';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,7 +23,8 @@ import { v4 as uuidv4 } from 'uuid';
 export class VerifierService {
   constructor(
     private readonly configService: ConfigService<AllConfigType>,
-    private readonly polygonIdService: PolygonIdService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
 
   /**
@@ -32,27 +35,42 @@ export class VerifierService {
    * @param query - The zero-knowledge proof query parameters
    * @returns An object containing the universal link for the proof request
    */
-  requestProof(query: ZeroKnowledgeProofQuery) {
+  async requestProof(
+    query: ZeroKnowledgeProofQuery,
+  ): Promise<{ universal_link: string }> {
     const requestId = uuidv4();
 
+    const isDevelopment =
+      this.configService.getOrThrow('app.nodeEnv', { infer: true }) ===
+      'development';
+    const baseUrl = isDevelopment
+      ? 'http://192.168.0.101:8000'
+      : this.configService.getOrThrow('app.url', { infer: true });
+
+    const sessionId = 1;
+    const callbackURL = '/api/v1/identity/verifier/callback';
+    const uri = `${baseUrl}${callbackURL}?sessionId=${sessionId}`;
+
+    // Generate request for basic authentication
+    const request = auth.createAuthorizationRequest(
+      'reservation flow',
+      'did:polygonid:polygon:amoy:2qQ68JkRcf3xrHPQPWZei3YeVzHPP58wYNxx2mEouR',
+      uri,
+    );
+
+    request.id = requestId;
+    request.thid = requestId;
+
     const proofRequest: ZeroKnowledgeProofRequest = {
-      id: 1,
+      id: 6785,
       circuitId: CircuitId.AtomicQuerySigV2,
       query,
     };
 
-    const request = {
-      from: this.polygonIdService.getIssuerDID().string(),
-      id: requestId,
-      thid: requestId,
-      typ: 'application/iden3comm-plain-json',
-      type: 'https://iden3-communication.io/authorization/1.0/request',
-      body: {
-        callbackUrl: 'https://my-app.org/api/callback',
-        reason: 'reservation verification',
-        scope: [proofRequest],
-      },
-    };
+    const scope = request.body.scope ?? [];
+    request.body.scope = [...scope, proofRequest];
+
+    await this.cacheManager.set(`${sessionId}`, request, 3600 * 1000);
 
     // Base64 encode the verification request
     const base64EncodedRequest = btoa(JSON.stringify(request));
@@ -61,5 +79,56 @@ export class VerifierService {
     const universalLink = `https://wallet.privado.id/#i_m=${base64EncodedRequest}`;
 
     return { universal_link: universalLink };
+  }
+
+  async verificationCallback(sessionId: string, tokenStr: string) {
+    const resolvers = {
+      ['polygon:amoy']: new resolver.EthStateResolver(
+        this.configService.getOrThrow('polygonId.rpcUrl', {
+          infer: true,
+        }),
+        '0x1a4cC30f2aA0377b0c3bc9848766D90cb4404124',
+      ),
+      ['privado:main']: new resolver.EthStateResolver(
+        'https://rpc-mainnet.privado.id',
+        '0x3C9acB2205Aa72A05F6D77d708b5Cf85FCa3a896',
+      ),
+    };
+
+    const authRequest = (await this.cacheManager.get(
+      `${sessionId}`,
+    )) as AuthorizationRequestMessage;
+
+    const circuitDirectoryPath = this.configService.get(
+      'polygonId.circuitsPath',
+      {
+        infer: true,
+      },
+    );
+
+    // EXECUTE VERIFICATION
+    const verifier = await auth.Verifier.newVerifier({
+      stateResolver: resolvers,
+      circuitsDir: circuitDirectoryPath,
+      ipfsGatewayURL: this.configService.getOrThrow('polygonId.ipfsUrl', {
+        infer: true,
+      }),
+    });
+
+    try {
+      const opts = {
+        acceptedStateTransitionDelay: 5 * 60 * 1000, // 5 minute
+      };
+      const authResponse = await verifier.fullVerify(
+        tokenStr,
+        authRequest,
+        opts,
+      );
+      console.log('authResponse', authResponse);
+      return authResponse;
+    } catch (e) {
+      console.error('Error verifying proof:', e);
+      throw new Error('Verification failed');
+    }
   }
 }
