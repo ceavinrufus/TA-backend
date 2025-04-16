@@ -2,9 +2,11 @@ import { AllConfigType } from '@/config/config.type';
 import {
   core,
   CredentialStatusType,
+  ICircuitStorage,
   ICredentialWallet,
   IDataStorage,
   IIdentityWallet,
+  ProofService,
 } from '@0xpolygonid/js-sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -12,16 +14,29 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class PolygonIdService {
   private issuerDID: core.DID;
+  private proofService: ProofService;
 
   constructor(
     @Inject('DataStorage') private dataStorage: IDataStorage,
     @Inject('CredentialWallet') private credentialWallet: ICredentialWallet,
     @Inject('IdentityWallet') private identityWallet: IIdentityWallet,
+    @Inject('CircuitStorage') private circuitStorage: ICircuitStorage,
     private readonly configService: ConfigService<AllConfigType>,
   ) {
     this.initializeIssuerDID().then((did) => {
       this.issuerDID = did;
     });
+    this.proofService = new ProofService(
+      identityWallet,
+      credentialWallet,
+      circuitStorage,
+      this.dataStorage.states,
+      {
+        ipfsGatewayURL: this.configService.getOrThrow('polygonId.ipfsUrl', {
+          infer: true,
+        }),
+      },
+    );
   }
 
   async initializeIssuerDID(): Promise<core.DID> {
@@ -54,6 +69,12 @@ export class PolygonIdService {
   }
   getDataStorage(): IDataStorage {
     return this.dataStorage;
+  }
+  getCircuitStorage(): ICircuitStorage {
+    return this.circuitStorage;
+  }
+  getProofService(): ProofService {
+    return this.proofService;
   }
   getCredentialStatusType(): CredentialStatusType {
     return CredentialStatusType.Iden3ReverseSparseMerkleTreeProof;

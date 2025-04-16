@@ -3,6 +3,7 @@ import { W3CCredential } from '@0xpolygonid/js-sdk';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { IssueCredentialReqDto } from './dto/issue-credential.req.dto';
+import { RequestProofReqDto } from './dto/request-proof.req.dto';
 import { IssuerService } from './issuer.service';
 import { VerifierService } from './verifier.service';
 
@@ -65,5 +66,23 @@ export class IdentityController {
       credentialSchema,
       expiration,
     );
+  }
+
+  /**
+   * Creates a zero-knowledge proof request
+   * @param query - The proof request parameters
+   * @returns Object containing the universal link for the proof request to be sent to the wallet
+   */
+  @Post('verifier/request-proof')
+  @ApiPublic({
+    summary: 'Request zero-knowledge proof',
+  })
+  async requestProof(
+    @Body() query: RequestProofReqDto,
+  ): Promise<{ universal_link: string }> {
+    return this.verifierService.requestProof({
+      ...query,
+      credentialSubject: JSON.parse(query.credentialSubject),
+    });
   }
 }

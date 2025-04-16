@@ -9,6 +9,8 @@ import {
   defaultEthConnectionConfig,
   EthConnectionConfig,
   EthStateStorage,
+  FSCircuitStorage,
+  ICircuitStorage,
   ICredentialWallet,
   IDataStorage,
   Identity,
@@ -42,6 +44,11 @@ import { PolygonIdService } from './polygon-id.service';
         conf.url = config.get('polygonId.rpcUrl', {
           infer: true,
         });
+        conf.chainId = Number(
+          config.get('polygonId.chainId', {
+            infer: true,
+          }),
+        );
 
         return {
           credential: new CredentialStorage(
@@ -102,12 +109,27 @@ import { PolygonIdService } from './polygon-id.service';
       },
       inject: ['DataStorage', 'CredentialWallet'],
     },
+    {
+      provide: 'CircuitStorage',
+      useFactory: async (
+        config: ConfigService<AllConfigType>,
+      ): Promise<ICircuitStorage> => {
+        const circuitDirectoryPath = config.get('polygonId.circuitsPath', {
+          infer: true,
+        });
+        return new FSCircuitStorage({
+          dirname: circuitDirectoryPath,
+        });
+      },
+      inject: [ConfigService],
+    },
     PolygonIdService,
   ],
   exports: [
     'DataStorage',
     'CredentialWallet',
     'IdentityWallet',
+    'CircuitStorage',
     PolygonIdService,
   ],
 })
