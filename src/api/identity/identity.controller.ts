@@ -15,6 +15,22 @@ import { VerifierService } from './verifier.service';
   path: 'identity',
   version: '1',
 })
+/**
+ * Controller handling identity-related operations including credential issuance and verification
+ * @class IdentityController
+ *
+ * @description
+ * This controller provides endpoints for:
+ * - Retrieving fetch requests for identities
+ * - Getting W3C verifiable credentials
+ * - Issuing new W3C verifiable credentials
+ * - Creating and handling zero-knowledge proof requests
+ * - Processing verification callbacks
+ *
+ * @constructor
+ * @param issuerService - Service handling credential issuance operations
+ * @param verifierService - Service handling credential verification operations
+ */
 export class IdentityController {
   constructor(
     private readonly issuerService: IssuerService,
@@ -91,8 +107,7 @@ export class IdentityController {
 
   /**
    * Callback endpoint for proof verification
-   * @param sessionId - The unique session identifier
-   * @param body - The response body from the wallet
+   * @query sessionId - The unique session identifier
    * @returns The authorization response message
    */
   @Post('verifier/callback')

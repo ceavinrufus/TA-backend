@@ -20,8 +20,7 @@ export class IssuerService {
     credentialSchema: string,
     expiration: number,
   ): Promise<{ credential_id: string; universal_link: string }> {
-    console.log('=============== Issuing Credential ===============');
-
+    // Create the credential request
     const credentialRequest = {
       credentialSchema,
       type,
@@ -46,16 +45,10 @@ export class IssuerService {
     //   .getDataStorage()
     //   .credential.saveCredential(credential);
 
-    console.log(
-      '================= generate Iden3SparseMerkleTreeProof =======================',
-    );
-
     // Add the credential to the Merkle Tree
     const merkleTreeResult = await this.polygonIdService
       .getIdentityWallet()
       .addCredentialsToMerkleTree([credential], issuerDID);
-
-    console.log('================= push states to rhs ===================');
 
     // Publish the state to the RHS
     await this.polygonIdService
@@ -70,15 +63,13 @@ export class IssuerService {
         },
       );
 
-    // console.log('================= publish to blockchain ===================');
-
     // Publish the state to the blockchain
     const ethSigner = new ethers.Wallet(
       this.configService.getOrThrow('polygonId.walletKey', { infer: true }),
       this.polygonIdService.getDataStorage().states.getRpcProvider(),
     );
 
-    await this.polygonIdService
+    const txId = await this.polygonIdService
       .getProofService()
       .transitState(
         issuerDID,
@@ -88,16 +79,29 @@ export class IssuerService {
         ethSigner,
       );
 
+    // Generate the Iden3SparseMerkleTreeProof
+    const credentialsWithProof = await this.polygonIdService
+      .getIdentityWallet()
+      .generateIden3SparseMerkleTreeProof(issuerDID, [credential], txId);
+
+    // Save the credentials with proof
+    await this.polygonIdService
+      .getCredentialWallet()
+      .saveAll(credentialsWithProof);
+
     const credentialId = credential.id.replace('urn:', '');
 
     const isDevelopment =
       this.configService.getOrThrow('app.nodeEnv', { infer: true }) ===
       'development';
     const baseUrl = isDevelopment
-      ? 'http://192.168.0.101:8000'
+      ? 'http://192.168.0.101:8000/'
       : this.configService.getOrThrow('app.url', { infer: true });
+    const apiPrefix = this.configService.getOrThrow('app.apiPrefix', {
+      infer: true,
+    });
 
-    const universalLink = `https://wallet.privado.id#request_uri=${encodeURIComponent(baseUrl + '/api/v1/identity/' + credentialId)}`;
+    const universalLink = `https://wallet.privado.id#request_uri=${encodeURIComponent(baseUrl + apiPrefix + '/v1/identity/' + credentialId)}`;
 
     return {
       credential_id: credentialId,
@@ -115,8 +119,11 @@ export class IssuerService {
       this.configService.getOrThrow('app.nodeEnv', { infer: true }) ===
       'development';
     const baseUrl = isDevelopment
-      ? 'http://192.168.0.101:8000'
+      ? 'http://192.168.0.101:8000/'
       : this.configService.getOrThrow('app.url', { infer: true });
+    const apiPrefix = this.configService.getOrThrow('app.apiPrefix', {
+      infer: true,
+    });
 
     const credentialOffer = {
       id: requestId,
@@ -124,7 +131,7 @@ export class IssuerService {
       typ: 'application/iden3comm-plain-json',
       type: 'https://iden3-communication.io/credentials/1.0/offer',
       body: {
-        url: `${baseUrl}/api/v1/identity/credentials/${id}`, // Where full credential is served
+        url: `${baseUrl}${apiPrefix}/v1/identity/credentials/${id}`, // Where full credential is served
         credentials: [
           {
             id: `${id}`,

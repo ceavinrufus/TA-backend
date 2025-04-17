@@ -44,12 +44,15 @@ export class VerifierService {
       this.configService.getOrThrow('app.nodeEnv', { infer: true }) ===
       'development';
     const baseUrl = isDevelopment
-      ? 'http://192.168.0.101:8000'
+      ? 'http://192.168.0.101:8000/'
       : this.configService.getOrThrow('app.url', { infer: true });
+    const apiPrefix = this.configService.getOrThrow('app.apiPrefix', {
+      infer: true,
+    });
 
     const sessionId = 1;
-    const callbackURL = '/api/v1/identity/verifier/callback';
-    const uri = `${baseUrl}${callbackURL}?sessionId=${sessionId}`;
+    const callbackURL = '/v1/identity/verifier/callback';
+    const uri = `${baseUrl}${apiPrefix}${callbackURL}?sessionId=${sessionId}`;
 
     // Generate request for basic authentication
     const request = auth.createAuthorizationRequest(
@@ -124,7 +127,6 @@ export class VerifierService {
         authRequest,
         opts,
       );
-      console.log('authResponse', authResponse);
       return authResponse;
     } catch (e) {
       console.error('Error verifying proof:', e);
