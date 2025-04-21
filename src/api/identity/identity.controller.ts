@@ -1,6 +1,9 @@
 import { ApiPublic } from '@/decorators/http.decorators';
 import { W3CCredential } from '@0xpolygonid/js-sdk';
-import { AuthorizationResponseMessage } from '@iden3/js-iden3-auth/dist/types/types-sdk';
+import {
+  AuthorizationRequestMessage,
+  AuthorizationResponseMessage,
+} from '@iden3/js-iden3-auth/dist/types/types-sdk';
 import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -76,7 +79,7 @@ export class IdentityController {
   })
   async issueCredential(
     @Body() dto: IssueCredentialReqDto,
-  ): Promise<{ credential_id: string; universal_link: string }> {
+  ): Promise<{ data: { credential_id: string } }> {
     const { credentialSubject, type, credentialSchema, expiration } = dto;
 
     return await this.issuerService.issueCredential(
@@ -98,8 +101,9 @@ export class IdentityController {
   })
   async requestProof(
     @Body() query: RequestProofReqDto,
-  ): Promise<{ universal_link: string }> {
-    return this.verifierService.requestProof({
+    @Query('reason') reason: string,
+  ): Promise<{ data: { request: AuthorizationRequestMessage } }> {
+    return this.verifierService.requestProof(reason, {
       ...query,
       credentialSubject: JSON.parse(query.credentialSubject),
     });

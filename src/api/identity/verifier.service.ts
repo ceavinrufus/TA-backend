@@ -5,7 +5,10 @@ import {
   ZeroKnowledgeProofRequest,
 } from '@0xpolygonid/js-sdk';
 import { auth, resolver } from '@iden3/js-iden3-auth';
-import { AuthorizationRequestMessage } from '@iden3/js-iden3-auth/dist/types/types-sdk';
+import {
+  AuthorizationRequestMessage,
+  AuthorizationResponseMessage,
+} from '@iden3/js-iden3-auth/dist/types/types-sdk';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -36,8 +39,9 @@ export class VerifierService {
    * @returns An object containing the universal link for the proof request
    */
   async requestProof(
+    reason: string,
     query: ZeroKnowledgeProofQuery,
-  ): Promise<{ universal_link: string }> {
+  ): Promise<{ data: { request: AuthorizationRequestMessage } }> {
     const requestId = uuidv4();
 
     const isDevelopment =
@@ -56,7 +60,7 @@ export class VerifierService {
 
     // Generate request for basic authentication
     const request = auth.createAuthorizationRequest(
-      'reservation flow',
+      reason,
       'did:polygonid:polygon:amoy:2qQ68JkRcf3xrHPQPWZei3YeVzHPP58wYNxx2mEouR',
       uri,
     );
@@ -65,7 +69,7 @@ export class VerifierService {
     request.thid = requestId;
 
     const proofRequest: ZeroKnowledgeProofRequest = {
-      id: 6785,
+      id: Math.floor(Math.random() * 10000),
       circuitId: CircuitId.AtomicQuerySigV2,
       query,
     };
@@ -75,16 +79,13 @@ export class VerifierService {
 
     await this.cacheManager.set(`${sessionId}`, request, 3600 * 1000);
 
-    // Base64 encode the verification request
-    const base64EncodedRequest = btoa(JSON.stringify(request));
-
-    // Configure the Wallet URL (universal link)
-    const universalLink = `https://wallet.privado.id/#i_m=${base64EncodedRequest}`;
-
-    return { universal_link: universalLink };
+    return { data: { request } };
   }
 
-  async verificationCallback(sessionId: string, tokenStr: string) {
+  async verificationCallback(
+    sessionId: string,
+    tokenStr: string,
+  ): Promise<AuthorizationResponseMessage> {
     const resolvers = {
       ['polygon:amoy']: new resolver.EthStateResolver(
         this.configService.getOrThrow('polygonId.rpcUrl', {

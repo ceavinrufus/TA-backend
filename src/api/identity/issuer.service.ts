@@ -19,7 +19,7 @@ export class IssuerService {
     type: string,
     credentialSchema: string,
     expiration: number,
-  ): Promise<{ credential_id: string; universal_link: string }> {
+  ): Promise<{ data: { credential_id: string } }> {
     // Create the credential request
     const credentialRequest = {
       credentialSchema,
@@ -69,43 +69,36 @@ export class IssuerService {
       this.polygonIdService.getDataStorage().states.getRpcProvider(),
     );
 
-    const txId = await this.polygonIdService
-      .getProofService()
-      .transitState(
-        issuerDID,
-        merkleTreeResult.oldTreeState,
-        true,
-        this.polygonIdService.getDataStorage().states,
-        ethSigner,
-      );
+    try {
+      const txId = await this.polygonIdService
+        .getProofService()
+        .transitState(
+          issuerDID,
+          merkleTreeResult.oldTreeState,
+          true,
+          this.polygonIdService.getDataStorage().states,
+          ethSigner,
+        );
 
-    // Generate the Iden3SparseMerkleTreeProof
-    const credentialsWithProof = await this.polygonIdService
-      .getIdentityWallet()
-      .generateIden3SparseMerkleTreeProof(issuerDID, [credential], txId);
+      // Generate the Iden3SparseMerkleTreeProof
+      const credentialsWithProof = await this.polygonIdService
+        .getIdentityWallet()
+        .generateIden3SparseMerkleTreeProof(issuerDID, [credential], txId);
 
-    // Save the credentials with proof
-    await this.polygonIdService
-      .getCredentialWallet()
-      .saveAll(credentialsWithProof);
+      // Save the credentials with proof
+      await this.polygonIdService
+        .getCredentialWallet()
+        .saveAll(credentialsWithProof);
+    } catch (error) {
+      console.error('Error while publishing state to the blockchain:', error);
+    }
 
     const credentialId = credential.id.replace('urn:', '');
 
-    const isDevelopment =
-      this.configService.getOrThrow('app.nodeEnv', { infer: true }) ===
-      'development';
-    const baseUrl = isDevelopment
-      ? 'http://192.168.0.101:8000/'
-      : this.configService.getOrThrow('app.url', { infer: true });
-    const apiPrefix = this.configService.getOrThrow('app.apiPrefix', {
-      infer: true,
-    });
-
-    const universalLink = `https://wallet.privado.id#request_uri=${encodeURIComponent(baseUrl + apiPrefix + '/v1/identity/' + credentialId)}`;
-
     return {
-      credential_id: credentialId,
-      universal_link: universalLink,
+      data: {
+        credential_id: credentialId,
+      },
     };
   }
 
