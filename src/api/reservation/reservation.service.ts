@@ -212,6 +212,7 @@ export class ReservationService {
       guest_wallet_address,
       status,
       book_hash,
+      guest_did,
     } = dto;
 
     // Find the listing first
@@ -250,6 +251,7 @@ export class ReservationService {
       guest_wallet_address,
       status: status || ReservationStatus.ORDER_CREATED,
       book_hash,
+      guest_did,
     });
 
     const savedReservation =

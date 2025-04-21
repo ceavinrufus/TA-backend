@@ -130,6 +130,9 @@ export class ReservationEntity extends AbstractEntity {
   @Column('varchar', { nullable: true })
   book_hash: string;
 
+  @Column('varchar', { nullable: true })
+  guest_did: string;
+
   @DeleteDateColumn({
     name: 'deleted_at',
     type: 'timestamptz',

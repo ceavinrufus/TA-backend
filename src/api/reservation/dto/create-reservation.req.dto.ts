@@ -91,4 +91,7 @@ export class CreateReservationDto {
 
   @StringFieldOptional()
   book_hash?: string;
+
+  @StringFieldOptional()
+  guest_did?: string;
 }

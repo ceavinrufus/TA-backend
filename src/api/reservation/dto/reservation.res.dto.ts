@@ -103,6 +103,10 @@ export class ReservationResDto {
   @Expose()
   book_hash: string;
 
+  @StringField()
+  @Expose()
+  guest_did: string;
+
   @DateField()
   @Expose()
   deleted_at?: Date;
