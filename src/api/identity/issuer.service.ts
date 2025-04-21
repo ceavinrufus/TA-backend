@@ -105,7 +105,7 @@ export class IssuerService {
   // Function to get the fetch request
   // This is used to create a credential offer that will be sent to the user
   // The user will then use this offer to fetch the credential from the issuer
-  getFetchRequest(id: string) {
+  getFetchRequest(id: string, to: string) {
     const requestId = uuidv4();
 
     const isDevelopment =
@@ -133,7 +133,7 @@ export class IssuerService {
         ],
       },
       from: this.polygonIdService.getIssuerDID().string(),
-      to: 'did:iden3:privado:main:2SZJJKGC1CytxUV3127C6AESAphGjvUf5HVv972d6K',
+      to,
     };
 
     return credentialOffer;

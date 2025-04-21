@@ -49,8 +49,11 @@ export class IdentityController {
   @ApiPublic({
     summary: 'Get the fetch request',
   })
-  getFetchRequest(@Param('id') id: string) {
-    return this.issuerService.getFetchRequest(id);
+  getFetchRequest(
+    @Param('id') id: string,
+    @Query('to') to: string, // The wallet address to send the fetch request to
+  ) {
+    return this.issuerService.getFetchRequest(id, to);
   }
 
   /**
