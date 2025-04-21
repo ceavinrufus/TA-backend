@@ -39,6 +39,7 @@ export class VerifierService {
    * @returns An object containing the universal link for the proof request
    */
   async requestProof(
+    sessionId: number,
     reason: string,
     query: ZeroKnowledgeProofQuery,
   ): Promise<{ data: { request: AuthorizationRequestMessage } }> {
@@ -54,7 +55,6 @@ export class VerifierService {
       infer: true,
     });
 
-    const sessionId = 1;
     const callbackURL = '/v1/identity/verifier/callback';
     const uri = `${baseUrl}${apiPrefix}${callbackURL}?sessionId=${sessionId}`;
 
@@ -128,10 +128,28 @@ export class VerifierService {
         authRequest,
         opts,
       );
+
+      // Save to Redis or in-memory cache
+      await this.cacheManager.set(
+        `authResponse-${sessionId}`,
+        authResponse,
+        300 * 1000,
+      ); // TTL: 5 mins
+
       return authResponse;
     } catch (e) {
       console.error('Error verifying proof:', e);
       throw new Error('Verification failed');
     }
+  }
+
+  async getVerificationResult(
+    sessionId: string,
+  ): Promise<AuthorizationResponseMessage | null> {
+    const authResponse = await this.cacheManager.get(
+      `authResponse-${sessionId}`,
+    );
+
+    return authResponse as AuthorizationResponseMessage;
   }
 }

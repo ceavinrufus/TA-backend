@@ -74,8 +74,7 @@ export class IdentityController {
   @Post('issuer/issue-credential')
   @ApiPublic({
     type: W3CCredential,
-    summary: 'Search listings with filters and pagination',
-    isPaginated: true,
+    summary: 'Issue a W3C verifiable credential',
   })
   async issueCredential(
     @Body() dto: IssueCredentialReqDto,
@@ -95,15 +94,16 @@ export class IdentityController {
    * @param query - The proof request parameters
    * @returns Object containing the universal link for the proof request to be sent to the wallet
    */
-  @Post('verifier/request-proof')
+  @Post('verifier/request-proof/:sessionId')
   @ApiPublic({
     summary: 'Request zero-knowledge proof',
   })
   async requestProof(
     @Body() query: RequestProofReqDto,
+    @Param('sessionId') sessionId: number,
     @Query('reason') reason: string,
   ): Promise<{ data: { request: AuthorizationRequestMessage } }> {
-    return this.verifierService.requestProof(reason, {
+    return this.verifierService.requestProof(Number(sessionId), reason, {
       ...query,
       credentialSubject: JSON.parse(query.credentialSubject),
     });
@@ -126,5 +126,15 @@ export class IdentityController {
     const raw = await getRawBody(req);
     const tokenStr = raw.toString().trim();
     return await this.verifierService.verificationCallback(sessionId, tokenStr);
+  }
+
+  @Get('verifier/verification-result/:sessionId')
+  @ApiPublic({
+    summary: 'Get verification result for a session',
+  })
+  async getVerificationResult(
+    @Param('sessionId') sessionId: string,
+  ): Promise<AuthorizationResponseMessage | null> {
+    return this.verifierService.getVerificationResult(sessionId);
   }
 }

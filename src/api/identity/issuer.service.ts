@@ -151,7 +151,7 @@ export class IssuerService {
     ) as W3CCredential;
 
     return {
-      id: id,
+      id,
       typ: 'application/iden3comm-plain-json',
       type: 'https://iden3-communication.io/credentials/1.0/issuance-response',
       threadID: id,
@@ -159,7 +159,7 @@ export class IssuerService {
         credential: serializedCredential as W3CCredential,
       },
       from: this.polygonIdService.getIssuerDID().string(),
-      to: 'did:iden3:privado:main:2SZJJKGC1CytxUV3127C6AESAphGjvUf5HVv972d6K',
+      to: serializedCredential.credentialSubject.id,
     };
   }
 }
