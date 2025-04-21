@@ -1,11 +1,15 @@
 import { AllConfigType } from '@/config/config.type';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { auth } from '@iden3/js-iden3-auth';
+import { AuthorizationRequestMessage } from '@iden3/js-iden3-auth/dist/types/types-sdk';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { ethers } from 'ethers';
 import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { UserEntity } from '../user/entities/user.entity';
 import { LoginReqDto } from './dto/login.req.dto';
 import { LoginResDto } from './dto/login.res.dto';
@@ -20,6 +24,8 @@ export class AuthService {
     private readonly userRepository: Repository<UserEntity>,
     private readonly configService: ConfigService<AllConfigType>,
     private readonly jwtService: JwtService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {
     this.jwtSecret =
       this.configService.get('auth.secret', { infer: true }) ?? 'secret';
@@ -138,5 +144,42 @@ export class AuthService {
       user: user,
       accessToken: accessToken,
     });
+  }
+
+  async basicPrivadoAuth(
+    sessionId: string,
+  ): Promise<{ data: { request: AuthorizationRequestMessage } }> {
+    const requestId = uuidv4();
+
+    const isDevelopment =
+      this.configService.getOrThrow('app.nodeEnv', { infer: true }) ===
+      'development';
+    const baseUrl = isDevelopment
+      ? 'http://192.168.0.101:8000/'
+      : this.configService.getOrThrow('app.url', { infer: true });
+    const apiPrefix = this.configService.getOrThrow('app.apiPrefix', {
+      infer: true,
+    });
+
+    const callbackURL = '/v1/identity/verifier/callback';
+    const uri = `${baseUrl}${apiPrefix}${callbackURL}?sessionId=${sessionId}`;
+
+    // Generate request for basic authentication
+    const request = auth.createAuthorizationRequest(
+      'Authorization request',
+      'did:polygonid:polygon:amoy:2qQ68JkRcf3xrHPQPWZei3YeVzHPP58wYNxx2mEouR',
+      uri,
+    );
+
+    request.id = requestId;
+    request.thid = requestId;
+
+    await this.cacheManager.set(
+      `authRequest:${sessionId}`,
+      request,
+      3600 * 1000,
+    );
+
+    return { data: { request } };
   }
 }

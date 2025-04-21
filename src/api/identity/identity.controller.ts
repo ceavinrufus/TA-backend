@@ -103,7 +103,7 @@ export class IdentityController {
   })
   async requestProof(
     @Body() query: RequestProofReqDto,
-    @Param('sessionId') sessionId: number,
+    @Param('sessionId') sessionId: string,
     @Query('reason') reason: string,
   ): Promise<{ data: { request: AuthorizationRequestMessage } }> {
     return this.verifierService.requestProof(Number(sessionId), reason, {

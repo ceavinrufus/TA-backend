@@ -77,7 +77,11 @@ export class VerifierService {
     const scope = request.body.scope ?? [];
     request.body.scope = [...scope, proofRequest];
 
-    await this.cacheManager.set(`${sessionId}`, request, 3600 * 1000);
+    await this.cacheManager.set(
+      `authRequest:${sessionId}`,
+      request,
+      3600 * 1000,
+    );
 
     return { data: { request } };
   }
@@ -100,7 +104,7 @@ export class VerifierService {
     };
 
     const authRequest = (await this.cacheManager.get(
-      `${sessionId}`,
+      `authRequest:${sessionId}`,
     )) as AuthorizationRequestMessage;
 
     const circuitDirectoryPath = this.configService.get(
@@ -131,7 +135,7 @@ export class VerifierService {
 
       // Save to Redis or in-memory cache
       await this.cacheManager.set(
-        `authResponse-${sessionId}`,
+        `authResponse:${sessionId}`,
         authResponse,
         300 * 1000,
       ); // TTL: 5 mins
@@ -147,7 +151,7 @@ export class VerifierService {
     sessionId: string,
   ): Promise<AuthorizationResponseMessage | null> {
     const authResponse = await this.cacheManager.get(
-      `authResponse-${sessionId}`,
+      `authResponse:${sessionId}`,
     );
 
     return authResponse as AuthorizationResponseMessage;
