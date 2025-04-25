@@ -2,13 +2,11 @@ import { CursorPaginationDto } from '@/common/dto/cursor-pagination/cursor-pagin
 import { CursorPaginatedDto } from '@/common/dto/cursor-pagination/paginated.dto';
 import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
 import { Uuid } from '@/common/types/common.type';
-import { AllConfigType } from '@/config/config.type';
 import { ErrorCode } from '@/constants/error-code.constant';
 import { ValidationException } from '@/exceptions/validation.exception';
 import { buildPaginator } from '@/utils/cursor-pagination';
 import { paginate } from '@/utils/offset-pagination';
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { plainToInstance } from 'class-transformer';
@@ -27,7 +25,6 @@ export class PriceService {
   constructor(
     @InjectRepository(PriceEntity)
     private readonly priceRepository: Repository<PriceEntity>,
-    private readonly configService: ConfigService<AllConfigType>,
   ) {}
 
   async fetchExchangeRate(

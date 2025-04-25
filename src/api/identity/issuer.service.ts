@@ -20,6 +20,12 @@ export class IssuerService {
     credentialSchema: string,
     expiration: number,
   ): Promise<{ data: { credential_id: string } }> {
+    const credentialsList = await this.polygonIdService
+      .getCredentialWallet()
+      .list();
+
+    const isOldStateGenesis = credentialsList.length === 1; // The old state is genesis if there is only one credential in the list
+
     // Create the credential request
     const credentialRequest = {
       credentialSchema,
@@ -75,7 +81,7 @@ export class IssuerService {
         .transitState(
           issuerDID,
           merkleTreeResult.oldTreeState,
-          true,
+          isOldStateGenesis,
           this.polygonIdService.getDataStorage().states,
           ethSigner,
         );
