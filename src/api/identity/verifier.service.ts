@@ -39,7 +39,7 @@ export class VerifierService {
    * @returns An object containing the universal link for the proof request
    */
   async requestProof(
-    sessionId: number,
+    sessionId: string,
     reason: string,
     query: ZeroKnowledgeProofQuery,
   ): Promise<{ data: { request: AuthorizationRequestMessage } }> {

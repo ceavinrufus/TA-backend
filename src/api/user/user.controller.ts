@@ -87,7 +87,6 @@ export class UserController {
   @Get('me/stats')
   @ApiAuth({ summary: 'Get user stats' })
   async getUserStats(@CurrentUser('id') userId: Uuid) {
-    console.log('id', userId);
     return await this.userService.getUserStats(userId);
   }
 

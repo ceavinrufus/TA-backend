@@ -106,7 +106,7 @@ export class IdentityController {
     @Param('sessionId') sessionId: string,
     @Query('reason') reason: string,
   ): Promise<{ data: { request: AuthorizationRequestMessage } }> {
-    return this.verifierService.requestProof(Number(sessionId), reason, {
+    return this.verifierService.requestProof(sessionId, reason, {
       ...query,
       credentialSubject: JSON.parse(query.credentialSubject),
     });
