@@ -12,6 +12,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import assert from 'assert';
 import { plainToInstance } from 'class-transformer';
 import { Repository } from 'typeorm';
+import { ListingEntity } from '../listing/entities/listing.entity';
+import { ReservationEntity } from '../reservation/entities/reservation.entity';
 import { CreateUserReqDto } from './dto/create-user.req.dto';
 import { ListUserReqDto } from './dto/list-user.req.dto';
 import { LoadMoreUsersReqDto } from './dto/load-more-users.req.dto';
@@ -26,6 +28,10 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(ListingEntity)
+    private readonly listingRepository: Repository<ListingEntity>,
+    @InjectRepository(ReservationEntity)
+    private readonly reservationRepository: Repository<ReservationEntity>,
   ) {}
 
   async create(dto: CreateUserReqDto): Promise<UserResDto> {
@@ -152,44 +158,47 @@ export class UserService {
   async getUserStats(id: Uuid) {
     await this.userRepository.findOneByOrFail({ id });
 
-    // Get total reservations where user is host
-    const totalReservations = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoin('reservations', 'reservation', 'reservation.host_id = user.id')
-      .where('user.id = :id', { id })
-      .andWhere('reservation.status NOT IN (:...excludedStatuses)', {
-        excludedStatuses: [
-          ReservationStatus.ORDER_CREATED,
-          ReservationStatus.ORDER_WAITING_PAYMENT,
-        ],
-      })
-      .getCount();
-
-    // Get total listings (assuming there's a listings table with host_id)
-    const totalListings = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoin('listings', 'listing', 'listing.host_id = user.id')
-      .where('user.id = :id', { id })
-      .andWhere('listing.status = :status', {
-        status: ListingStatus.LISTING_COMPLETED,
-      })
-      .getCount();
-
-    // Calculate total earnings from completed reservations, excluding pending earnings
     const now = new Date();
     const sevenDaysAgo = new Date(now);
     sevenDaysAgo.setDate(now.getDate() - 7);
 
-    const totalEarnings = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoin('reservations', 'reservation', 'reservation.host_id = user.id')
-      .where('user.id = :id', { id })
-      .andWhere('reservation.status = :status', {
-        status: ReservationStatus.ORDER_COMPLETED,
-      })
-      .andWhere('reservation.check_out_date <= :sevenDaysAgo', { sevenDaysAgo })
-      .select('SUM(reservation.total_price)', 'total')
-      .getRawOne();
+    const [totalReservations, totalListings, totalEarnings] = await Promise.all(
+      [
+        // Get total reservations where user is host
+        this.reservationRepository
+          .createQueryBuilder('reservation')
+          .where('reservation.host_id = :id', { id })
+          .andWhere('reservation.status NOT IN (:...excludedStatuses)', {
+            excludedStatuses: [
+              ReservationStatus.ORDER_CREATED,
+              ReservationStatus.ORDER_WAITING_PAYMENT,
+            ],
+          })
+          .getCount(),
+
+        // Get total listings
+        this.listingRepository
+          .createQueryBuilder('listing')
+          .where('listing.host_id = :id', { id })
+          .andWhere('listing.status = :status', {
+            status: ListingStatus.LISTING_COMPLETED,
+          })
+          .getCount(),
+
+        // Calculate total earnings from completed reservations
+        this.reservationRepository
+          .createQueryBuilder('reservation')
+          .where('reservation.host_id = :id', { id })
+          .andWhere('reservation.status = :status', {
+            status: ReservationStatus.ORDER_COMPLETED,
+          })
+          .andWhere('reservation.check_out_date <= :sevenDaysAgo', {
+            sevenDaysAgo,
+          })
+          .select('SUM(reservation.total_price)', 'total')
+          .getRawOne(),
+      ],
+    );
 
     return {
       totalReservations,
