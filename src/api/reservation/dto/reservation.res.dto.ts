@@ -57,11 +57,11 @@ export class ReservationResDto {
 
   @NumberField()
   @Expose()
-  tax: number;
+  service_fee: number;
 
   @NumberField()
   @Expose()
-  service_fee: number;
+  guest_deposit: number;
 
   @NumberField({ int: true })
   @Expose()

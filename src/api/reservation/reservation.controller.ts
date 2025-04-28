@@ -172,7 +172,7 @@ export class ReservationController {
     enum: ['upcoming', 'past', 'cancelled', 'paid', 'not-paid'],
   })
   async findAllByGuest(
-    @Query('guest_id') guest_id: Uuid,
+    @CurrentUser('id') guest_id: Uuid,
     @Query('category')
     category: 'all' | 'upcoming' | 'past' | 'cancelled' | 'paid' | 'not-paid',
     @Query() reqDto: ListReservationReqDto,
