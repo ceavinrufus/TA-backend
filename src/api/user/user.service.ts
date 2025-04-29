@@ -53,8 +53,9 @@ export class UserService {
       name,
       email,
       wallet_address,
-      is_verified: false,
-      is_anonymous: false,
+      is_liveness_verified: false,
+      is_uniqueness_verified: false,
+      is_identity_verified: false,
     });
 
     const savedUser = await this.userRepository.save(newUser);

@@ -30,11 +30,15 @@ export class UserResDto {
 
   @BooleanField()
   @Expose()
-  is_verified: boolean;
+  is_liveness_verified: boolean;
 
   @BooleanField()
   @Expose()
-  is_anonymous: boolean;
+  is_uniqueness_verified: boolean;
+
+  @BooleanField()
+  @Expose()
+  is_identity_verified: boolean;
 
   @BooleanField()
   @Expose()

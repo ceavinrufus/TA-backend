@@ -39,10 +39,13 @@ export class UserEntity extends AbstractEntity {
   wallet_address: string;
 
   @Column({ default: false })
-  is_verified: boolean;
+  is_liveness_verified: boolean;
 
   @Column({ default: false })
-  is_anonymous: boolean;
+  is_uniqueness_verified: boolean;
+
+  @Column({ default: false })
+  is_identity_verified: boolean;
 
   @Column({ default: false })
   is_host: boolean;

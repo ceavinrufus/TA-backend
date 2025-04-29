@@ -19,10 +19,13 @@ export class CreateUserReqDto {
   wallet_address: string;
 
   @BooleanFieldOptional()
-  is_verified?: boolean;
+  is_liveness_verified?: boolean;
 
   @BooleanFieldOptional()
-  is_anonymous?: boolean;
+  is_uniqueness_verified?: boolean;
+
+  @BooleanFieldOptional()
+  is_identity_verified?: boolean;
 
   @BooleanFieldOptional()
   is_host?: boolean;
