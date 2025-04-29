@@ -270,7 +270,7 @@ export class ListingService {
     });
 
     if (!listing) {
-      throw new ValidationException(ErrorCode.E001, 'Listing not found');
+      throw new ValidationException(ErrorCode.V003, 'Listing not found');
     }
 
     return plainToInstance(ListingResDto, listing, {
@@ -287,7 +287,7 @@ export class ListingService {
     });
 
     if (!listing) {
-      throw new ValidationException(ErrorCode.E001, 'Listing not found');
+      throw new ValidationException(ErrorCode.V003, 'Listing not found');
     }
 
     return plainToInstance(ListingResDto, listing, {
@@ -301,7 +301,7 @@ export class ListingService {
     });
 
     if (!listing) {
-      throw new ValidationException(ErrorCode.E001, 'Listing not found');
+      throw new ValidationException(ErrorCode.V003, 'Listing not found');
     }
 
     let slug: string;
@@ -345,7 +345,7 @@ export class ListingService {
     });
 
     if (!listing) {
-      throw new ValidationException(ErrorCode.E001, 'Listing not found');
+      throw new ValidationException(ErrorCode.V003, 'Listing not found');
     }
 
     await this.listingRepository.softDelete(id);

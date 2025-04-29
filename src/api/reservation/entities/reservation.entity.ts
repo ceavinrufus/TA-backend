@@ -65,13 +65,12 @@ export class ReservationEntity extends AbstractEntity {
   @Column('float', { nullable: true })
   base_price: number;
 
-  // Tax
-  @Column('float', { nullable: true })
-  tax: number;
-
   // Service fee
   @Column('float', { nullable: true })
   service_fee: number;
+
+  @Column('float', { nullable: true })
+  guest_deposit: number;
 
   @JoinColumn({
     name: 'host_id',
@@ -129,6 +128,9 @@ export class ReservationEntity extends AbstractEntity {
 
   @Column('varchar', { nullable: true })
   book_hash: string;
+
+  @Column('varchar', { nullable: true })
+  guest_did: string;
 
   @DeleteDateColumn({
     name: 'deleted_at',

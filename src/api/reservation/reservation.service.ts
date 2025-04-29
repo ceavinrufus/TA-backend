@@ -201,8 +201,8 @@ export class ReservationService {
       guest_id,
       host_id,
       base_price,
-      tax,
       service_fee,
+      guest_deposit,
       night_staying,
       check_in_date,
       check_out_date,
@@ -212,6 +212,7 @@ export class ReservationService {
       guest_wallet_address,
       status,
       book_hash,
+      guest_did,
     } = dto;
 
     // Find the listing first
@@ -241,8 +242,8 @@ export class ReservationService {
       listing_address: listing.address,
       listing_name: listing.name,
       base_price,
-      tax,
       service_fee,
+      guest_deposit,
       night_staying,
       guest_number,
       total_price,
@@ -250,6 +251,7 @@ export class ReservationService {
       guest_wallet_address,
       status: status || ReservationStatus.ORDER_CREATED,
       book_hash,
+      guest_did,
     });
 
     const savedReservation =

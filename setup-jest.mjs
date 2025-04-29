@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 process.env.NODE_ENV = 'test';
 process.env.MODULES_SET = 'monolith';
-process.env.APP_NAME = 'Self Hosting';
+process.env.APP_NAME = 'StayChain';
 process.env.APP_URL = 'http://localhost:8000';
 process.env.APP_PORT = '8000';
 process.env.APP_DEBUG = 'false';

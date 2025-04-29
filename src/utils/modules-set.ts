@@ -7,6 +7,8 @@ import databaseConfig from '@/database/config/database.config';
 import { TypeOrmConfigService } from '@/database/typeorm-config.service';
 import { MailModule } from '@/mail/mail.module';
 import redisConfig from '@/redis/config/redis.config';
+import polygonIdConfig from '@/shared/polygon-id/config/polygon-id-config';
+import { SharedModule } from '@/shared/shared.module';
 import { BullModule } from '@nestjs/bullmq';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ModuleMetadata } from '@nestjs/common';
@@ -21,7 +23,13 @@ function generateModulesSet() {
   const imports: ModuleMetadata['imports'] = [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, authConfig, redisConfig],
+      load: [
+        appConfig,
+        databaseConfig,
+        authConfig,
+        redisConfig,
+        polygonIdConfig,
+      ],
       envFilePath: ['.env'],
     }),
   ];
@@ -93,6 +101,7 @@ function generateModulesSet() {
     case 'monolith':
       customModules = [
         ApiModule,
+        SharedModule,
         bullModule,
         BackgroundModule,
         cacheModule,
@@ -104,6 +113,7 @@ function generateModulesSet() {
     case 'api':
       customModules = [
         ApiModule,
+        SharedModule,
         bullModule,
         cacheModule,
         dbModule,
@@ -113,6 +123,7 @@ function generateModulesSet() {
       break;
     case 'background':
       customModules = [
+        SharedModule,
         bullModule,
         BackgroundModule,
         cacheModule,

@@ -383,7 +383,7 @@ describe('ListingService', () => {
       mockRepository.findOne.mockResolvedValue(null);
 
       await expect(service.findOne(listingId)).rejects.toThrow(
-        new ValidationException(ErrorCode.E001, 'Listing not found'),
+        new ValidationException(ErrorCode.V003, 'Listing not found'),
       );
     });
   });
@@ -417,7 +417,7 @@ describe('ListingService', () => {
       mockRepository.findOne.mockResolvedValue(null);
 
       await expect(service.remove(listingId)).rejects.toThrow(
-        new ValidationException(ErrorCode.E001, 'Listing not found'),
+        new ValidationException(ErrorCode.V003, 'Listing not found'),
       );
     });
   });

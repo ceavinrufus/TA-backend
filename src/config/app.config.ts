@@ -90,8 +90,7 @@ export default registerAs<AppConfig>('app', () => {
     logLevel: process.env.APP_LOG_LEVEL || 'warn',
     logService: process.env.APP_LOG_SERVICE || LogService.CONSOLE,
     corsOrigin: getCorsOrigin(),
-    apiKey: process.env.SELF_HOSTING_API_KEY,
-    coinmarketcapApiKey: process.env.COINMARKETCAP_API_KEY,
+    apiKey: process.env.API_KEY,
   };
 });
 

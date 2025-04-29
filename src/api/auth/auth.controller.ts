@@ -1,5 +1,6 @@
 import { ApiPublic } from '@/decorators/http.decorators';
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { AuthorizationRequestMessage } from '@iden3/js-iden3-auth/dist/types/types-sdk';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginReqDto } from './dto/login.req.dto';
@@ -28,5 +29,15 @@ export class AuthController {
   @Post('login')
   async login(@Body() payload: LoginReqDto): Promise<LoginResDto> {
     return await this.authService.authenticate(payload);
+  }
+
+  @Post('did/:sessionId')
+  @ApiPublic({
+    summary: 'Request Privado ID auth',
+  })
+  async basicAuth(
+    @Param('sessionId') sessionId: string,
+  ): Promise<{ data: { request: AuthorizationRequestMessage } }> {
+    return this.authService.basicPrivadoAuth(sessionId);
   }
 }

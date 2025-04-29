@@ -54,10 +54,10 @@ export class CreateReservationDto {
   base_price: number;
 
   @NumberFieldOptional()
-  tax: number;
+  service_fee: number;
 
   @NumberFieldOptional()
-  service_fee: number;
+  guest_deposit?: number;
 
   @NumberFieldOptional()
   night_staying?: number;
@@ -91,4 +91,7 @@ export class CreateReservationDto {
 
   @StringFieldOptional()
   book_hash?: string;
+
+  @StringFieldOptional()
+  guest_did?: string;
 }
