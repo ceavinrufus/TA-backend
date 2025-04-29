@@ -32,7 +32,7 @@ export class DisputeService {
     });
 
     if (existingDispute) {
-      throw new ValidationException(ErrorCode.E001);
+      throw new ValidationException(ErrorCode.V004);
     }
 
     const newDispute = new DisputeEntity({

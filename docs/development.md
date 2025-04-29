@@ -36,7 +36,7 @@ NODE_ENV=development
 MODULES_SET=monolith
 
 ##== Application
-APP_NAME="Self Hosting"
+APP_NAME="StayChain"
 APP_URL=http://localhost:8000
 APP_PORT=8000
 APP_DEBUG=false

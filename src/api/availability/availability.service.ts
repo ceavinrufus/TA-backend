@@ -35,7 +35,7 @@ export class AvailabilityService {
     });
 
     if (existingAvailability) {
-      throw new ValidationException(ErrorCode.E001);
+      throw new ValidationException(ErrorCode.V004);
     }
 
     const newAvailability = new AvailabilityEntity({

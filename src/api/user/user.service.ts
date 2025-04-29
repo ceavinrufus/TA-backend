@@ -37,7 +37,6 @@ export class UserService {
   async create(dto: CreateUserReqDto): Promise<UserResDto> {
     const { name, email, wallet_address } = dto;
 
-    // check uniqueness of detrip user id/email
     const user = await this.userRepository.findOne({
       where: [
         {
@@ -47,7 +46,7 @@ export class UserService {
     });
 
     if (user) {
-      throw new ValidationException(ErrorCode.E001);
+      throw new ValidationException(ErrorCode.V004);
     }
 
     const newUser = new UserEntity({

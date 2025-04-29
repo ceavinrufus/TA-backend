@@ -99,7 +99,7 @@ describe('SearchListingService', () => {
         service.checkAvailability(slug, startDate, endDate),
       ).rejects.toThrow(
         new ValidationException(
-          ErrorCode.E001,
+          ErrorCode.V003,
           'Listing not found or not available for the selected dates',
         ),
       );
@@ -113,7 +113,7 @@ describe('SearchListingService', () => {
         service.checkAvailability(slug, invalidStartDate, invalidEndDate),
       ).rejects.toThrow(
         new ValidationException(
-          ErrorCode.E002,
+          ErrorCode.V002,
           'Start date must be before end date',
         ),
       );
@@ -195,7 +195,7 @@ describe('SearchListingService', () => {
         service.checkAvailability(slug, restrictedStartDate, endDate),
       ).rejects.toThrow(
         new ValidationException(
-          ErrorCode.E001,
+          ErrorCode.V003,
           'Listing not found or not available for the selected dates',
         ),
       );
@@ -222,7 +222,7 @@ describe('SearchListingService', () => {
         service.checkAvailability(slug, startDate, restrictedEndDate),
       ).rejects.toThrow(
         new ValidationException(
-          ErrorCode.E001,
+          ErrorCode.V003,
           'Listing not found or not available for the selected dates',
         ),
       );
@@ -254,7 +254,7 @@ describe('SearchListingService', () => {
         ),
       ).rejects.toThrow(
         new ValidationException(
-          ErrorCode.E001,
+          ErrorCode.V003,
           'Listing not found or not available for the selected dates',
         ),
       );
@@ -283,7 +283,7 @@ describe('SearchListingService', () => {
         service.checkAvailability(slug, bufferStartDate, bufferEndDate),
       ).rejects.toThrow(
         new ValidationException(
-          ErrorCode.E001,
+          ErrorCode.V003,
           'Listing not found or not available for the selected dates',
         ),
       );
@@ -340,7 +340,7 @@ describe('SearchListingService', () => {
         service.checkAvailability(slug, bufferStartDate, bufferEndDate),
       ).rejects.toThrow(
         new ValidationException(
-          ErrorCode.E001,
+          ErrorCode.V003,
           'Listing not found or not available for the selected dates',
         ),
       );
@@ -405,7 +405,7 @@ describe('SearchListingService', () => {
       };
 
       await expect(service.search(searchDto)).rejects.toThrow(
-        new ValidationException(ErrorCode.E003, 'Invalid sorting field'),
+        new ValidationException(ErrorCode.V002, 'Invalid sorting field'),
       );
     });
 

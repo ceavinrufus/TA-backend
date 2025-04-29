@@ -306,7 +306,7 @@ export class SearchListingService {
       const field = dto.filters.sorting.sorting_by;
 
       if (!allowedFields.includes(field)) {
-        throw new ValidationException(ErrorCode.E003, 'Invalid sorting field');
+        throw new ValidationException(ErrorCode.V002, 'Invalid sorting field');
       }
 
       const direction = dto.filters.sorting.desc ? 'DESC' : 'ASC';
@@ -418,7 +418,7 @@ export class SearchListingService {
 
     if (startDate >= endDate) {
       throw new ValidationException(
-        ErrorCode.E002,
+        ErrorCode.V002,
         'Start date must be before end date',
       );
     }
@@ -615,7 +615,7 @@ export class SearchListingService {
     if (!listing) {
       await this.cacheAvailability(slug, startDate, endDate, null);
       throw new ValidationException(
-        ErrorCode.E001,
+        ErrorCode.V003,
         'Listing not found or not available for the selected dates',
       );
     }
@@ -694,7 +694,7 @@ export class SearchListingService {
     const cachedData = await this.cacheManager.get(key);
     if (cachedData === 'NOT_FOUND') {
       throw new ValidationException(
-        ErrorCode.E001,
+        ErrorCode.V003,
         'Listing not found or not available for the selected dates',
       );
     }

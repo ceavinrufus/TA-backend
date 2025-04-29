@@ -10,8 +10,8 @@ import { vi as viThemeConfig } from './config/theme/vi.config.mjs';
 
 export default defineUserConfig({
   lang: 'en-US',
-  title: 'Self Hosting',
-  description: 'Self Hosting microservice for DeTrip',
+  title: 'StayChain',
+  description: 'StayChain backend',
   base: '/self-hosting/',
   bundler: viteBundler(),
   markdown: {
@@ -22,11 +22,11 @@ export default defineUserConfig({
   locales: {
     '/': {
       lang: 'en-US',
-      title: 'Self Hosting',
+      title: 'StayChain',
     },
     '/vi/': {
       lang: 'vi-VN',
-      title: 'Self Hosting',
+      title: 'StayChain',
     },
   },
   theme: defaultTheme({

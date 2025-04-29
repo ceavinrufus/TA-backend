@@ -70,7 +70,7 @@ export class PriceService {
     });
 
     if (existingPrice) {
-      throw new ValidationException(ErrorCode.E001);
+      throw new ValidationException(ErrorCode.V004);
     }
 
     const newPrice = new PriceEntity({
