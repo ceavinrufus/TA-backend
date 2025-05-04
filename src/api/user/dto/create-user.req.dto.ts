@@ -1,19 +1,12 @@
 import {
   BooleanFieldOptional,
-  EmailFieldOptional,
   StringField,
   StringFieldOptional,
 } from '@/decorators/field.decorators';
-import { lowerCaseTransformer } from '@/utils/transformers/lower-case.transformer';
-import { Transform } from 'class-transformer';
 
 export class CreateUserReqDto {
   @StringFieldOptional()
-  @Transform(lowerCaseTransformer)
-  name: string;
-
-  @EmailFieldOptional()
-  email?: string;
+  did: string;
 
   @StringField()
   wallet_address: string;

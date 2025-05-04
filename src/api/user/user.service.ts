@@ -35,7 +35,7 @@ export class UserService {
   ) {}
 
   async create(dto: CreateUserReqDto): Promise<UserResDto> {
-    const { name, email, wallet_address } = dto;
+    const { did, wallet_address } = dto;
 
     const user = await this.userRepository.findOne({
       where: [
@@ -50,8 +50,7 @@ export class UserService {
     }
 
     const newUser = new UserEntity({
-      name,
-      email,
+      did,
       wallet_address,
       is_liveness_verified: false,
       is_uniqueness_verified: false,
@@ -78,8 +77,6 @@ export class UserService {
   }
 
   private checkIsProfileComplete(user: UserEntity): boolean {
-    // user.name &&
-    // user.email &&
     return !!user.wallet_address;
   }
 

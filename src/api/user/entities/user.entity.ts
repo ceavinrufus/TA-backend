@@ -23,13 +23,13 @@ export class UserEntity extends AbstractEntity {
   id!: Uuid;
 
   @Column({
-    length: 50,
     nullable: true,
   })
-  name: string;
-
-  @Column({ nullable: true })
-  email: string;
+  @Index('UQ_user_did', {
+    where: '"deleted_at" IS NULL',
+    unique: true,
+  })
+  did: string;
 
   @Column({ default: '' })
   @Index('UQ_user_wallet_address', {
