@@ -105,6 +105,10 @@ export class ReservationResDto {
 
   @StringField()
   @Expose()
+  cancellation_transaction_hash: string;
+
+  @StringField()
+  @Expose()
   book_hash: string;
 
   @StringField()

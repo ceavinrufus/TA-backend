@@ -11,12 +11,12 @@ export class UserSeeder1722335726360 implements Seeder {
   ): Promise<any> {
     const repository = dataSource.getRepository(UserEntity);
 
-    const adminUser = await repository.findOneBy({ name: 'admin' });
+    const adminUser = await repository.findOneBy({
+      wallet_address: '0x1234567890abcdef1234567890abcdef12345678',
+    });
     if (!adminUser) {
       await repository.insert(
         new UserEntity({
-          name: 'admin',
-          email: 'admin@example.com',
           wallet_address: '0x1234567890abcdef1234567890abcdef12345678',
         }),
       );
