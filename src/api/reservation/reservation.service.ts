@@ -213,6 +213,7 @@ export class ReservationService {
       status,
       book_hash,
       guest_did,
+      booking_credential_id,
     } = dto;
 
     // Find the listing first
@@ -252,6 +253,7 @@ export class ReservationService {
       status: status || ReservationStatus.ORDER_CREATED,
       book_hash,
       guest_did,
+      booking_credential_id,
     });
 
     const savedReservation =

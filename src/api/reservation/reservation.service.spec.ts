@@ -68,6 +68,7 @@ describe('ReservationService', () => {
     dispute: null,
     status: ReservationStatus.ORDER_COMPLETED,
     guest_did: 'did:example:1234567890abcdef',
+    booking_credential_id: '',
     deleted_at: null,
     created_at: new Date(),
     updated_at: new Date(),

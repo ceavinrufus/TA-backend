@@ -107,6 +107,10 @@ export class ReservationResDto {
   @Expose()
   guest_did: string;
 
+  @StringField()
+  @Expose()
+  booking_credential_id: string;
+
   @DateField()
   @Expose()
   deleted_at?: Date;

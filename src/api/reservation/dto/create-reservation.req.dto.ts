@@ -94,4 +94,7 @@ export class CreateReservationDto {
 
   @StringFieldOptional()
   guest_did?: string;
+
+  @StringFieldOptional()
+  booking_credential_id?: string;
 }
