@@ -123,6 +123,9 @@ export class ReservationEntity extends AbstractEntity {
   @Column('varchar', { nullable: true })
   cancel_reason: string;
 
+  @Column('uuid', { nullable: true })
+  cancelled_by_id: Uuid;
+
   @OneToOne(() => DisputeEntity, (dispute) => dispute.reservation)
   dispute: Relation<DisputeEntity>;
 

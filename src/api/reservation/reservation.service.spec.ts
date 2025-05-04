@@ -62,6 +62,7 @@ describe('ReservationService', () => {
     book_hash: 'book-hash',
     booking_number: 'SH-123456',
     cancel_reason: null,
+    cancelled_by_id: guestId,
     listing_address: '123 Main St',
     listing_name: 'Hotel California',
     guest_wallet_address: '0x1234567890abcdef',

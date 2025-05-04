@@ -99,6 +99,10 @@ export class ReservationResDto {
   @Expose()
   cancel_reason: string;
 
+  @UUIDField()
+  @Expose()
+  cancelled_by_id: Uuid;
+
   @StringField()
   @Expose()
   book_hash: string;

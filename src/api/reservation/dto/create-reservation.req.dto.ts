@@ -89,6 +89,9 @@ export class CreateReservationDto {
   @StringFieldOptional()
   cancel_reason?: string;
 
+  @UUIDFieldOptional()
+  cancelled_by_id?: Uuid;
+
   @StringFieldOptional()
   book_hash?: string;
 
