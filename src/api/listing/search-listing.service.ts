@@ -378,8 +378,8 @@ export class SearchListingService {
       await this.cacheManager.set(
         cacheKey,
         JSON.stringify(result),
-        3600 * 1000,
-      ); // Cache for 1 hour
+        5 * 60 * 1000,
+      ); // Cache for 5 mins
     }
 
     return result;
@@ -682,7 +682,7 @@ export class SearchListingService {
     const key = `availability:${slug}:${startDate.toISOString()}:${endDate.toISOString()}`;
     const value =
       availability === null ? 'NOT_FOUND' : JSON.stringify(availability);
-    await this.cacheManager.set(key, value, 3600 * 1000); // Cache for 1 hour
+    await this.cacheManager.set(key, value, 5 * 60 * 1000); // Cache for 5 mins
   }
 
   private async getCachedAvailability(

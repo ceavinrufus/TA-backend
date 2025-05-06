@@ -64,11 +64,14 @@ export class IssuerService {
     issuerDID: any,
   ): Promise<void> {
     try {
-      const credentialsList = await this.polygonIdService
-        .getCredentialWallet()
-        .list();
+      // Get the current state from the identity's state storage
+      const currentState = await this.polygonIdService
+        .getDataStorage()
+        .states.getLatestStateById(issuerDID.id);
 
-      const isOldStateGenesis = credentialsList.length === 1;
+      // If no current state or the state is empty/zero, it's genesis
+      const isOldStateGenesis =
+        !currentState || currentState.state === BigInt(0);
 
       // Add the credential to the Merkle Tree
       const merkleTreeResult = await this.polygonIdService
