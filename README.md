@@ -11,7 +11,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/mobifi-official/self-hosting.git
+git clone https://github.com/ceavinrufus/TA-backend.git
 
 # Create environment variables file.
 cp .env.example .env

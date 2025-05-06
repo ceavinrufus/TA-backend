@@ -37,17 +37,17 @@ It will prompt you for the password you set during installation.
 Run the following SQL command to create a new database:
 
 ```sql
-CREATE DATABASE self_hosting;
+CREATE DATABASE tugas-akhir;
 ```
 
-You can replace `self_hosting` with your desired name.
+You can replace `tugas-akhir` with your desired name.
 
 ### Step 3: Connect to the Database
 
 Switch to the newly created database:
 
 ```sql
-\c self_hosting
+\c tugas-akhir
 ```
 
 ### Step 4: Exit

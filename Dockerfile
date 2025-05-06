@@ -36,6 +36,7 @@ WORKDIR /app
 COPY --chown=node:node package*.json pnpm-lock.yaml ./
 COPY --chown=node:node --from=development /app/node_modules ./node_modules
 COPY --chown=node:node --from=development /app/src ./src
+COPY --chown=node:node --from=development /app/circuits ./circuits
 COPY --chown=node:node --from=development /app/tsconfig.json ./tsconfig.json
 COPY --chown=node:node --from=development /app/tsconfig.build.json ./tsconfig.build.json
 COPY --chown=node:node --from=development /app/nest-cli.json ./nest-cli.json
@@ -62,6 +63,7 @@ RUN mkdir -p src/generated && chown -R node:node src
 COPY --chown=node:node --from=builder /app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /app/dist ./dist
 COPY --chown=node:node --from=builder /app/package.json ./
+COPY --chown=node:node --from=builder /app/circuits ./circuits
 
 USER node
 

@@ -1,7 +1,7 @@
 services:
-  self-hosting-api:
-    image: self-hosting-api
-    container_name: self-hosting-api
+  ta-backend-api:
+    image: ta-backend-api
+    container_name: ta-backend-api
     restart: always
     build:
       context: .
@@ -11,38 +11,7 @@ services:
     ports:
       - '8000:8000'
     networks:
-      - self-hosting-network
-
-  db:
-    image: postgres:16
-    container_name: self-hosting-postgres
-    restart: always
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: self_hosting
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      TZ: 'UTC'
-    ports:
-      - '25432:5432'
-    networks:
-      - self-hosting-network
-
-  redis:
-    image: redis/redis-stack:latest
-    restart: always
-    ports:
-      - '6379:6379'
-      - '8001:8001'
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: [ 'CMD', 'redis-cli', '--raw', 'incr', 'ping' ]
-    environment:
-      REDIS_ARGS: '--requirepass redispass'
-    networks:
-      - self-hosting-network
+      - ta-backend-network
 
   maildev:
     build:
@@ -52,29 +21,8 @@ services:
       - ${MAIL_CLIENT_PORT}:1080
       - ${MAIL_PORT}:1025
     networks:
-      - self-hosting-network
-
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    ports:
-      - '18080:80'
-    volumes:
-      - pgadmin_data:/root/.pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: 12345678
-      PGADMIN_CONFIG_WTF_CSRF_ENABLED: 'False'
-      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: 'False'
-    networks:
-      - self-hosting-network
-
-volumes:
-  postgres_data:
-  pgadmin_data:
-  redis_data:
-
+      - ta-backend-network
 
 networks:
-  self-hosting-network:
+  ta-backend-network:
     driver: bridge

@@ -12,7 +12,7 @@ export default defineUserConfig({
   lang: 'en-US',
   title: 'StayChain',
   description: 'StayChain backend',
-  base: '/self-hosting/',
+  base: '/tugas-akhir/',
   bundler: viteBundler(),
   markdown: {
     toc: {
@@ -30,7 +30,7 @@ export default defineUserConfig({
     },
   },
   theme: defaultTheme({
-    repo: 'mobifi-official/self-hosting',
+    repo: 'ceavinrufus/tugas-akhir',
     docsBranch: 'main',
     docsDir: 'docs',
     locales: {

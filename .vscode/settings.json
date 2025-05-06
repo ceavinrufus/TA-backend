@@ -5,8 +5,8 @@
       "server": "localhost",
       "port": 25432,
       "driver": "PostgreSQL",
-      "name": "self_hosting",
-      "database": "self_hosting",
+      "name": "postgres",
+      "database": "postgres",
       "username": "postgres",
       "password": "postgres"
     }
