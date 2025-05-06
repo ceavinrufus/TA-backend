@@ -28,7 +28,10 @@ export class HealthController {
   @HealthCheck()
   async check(): Promise<HealthCheckResult> {
     const list = [
-      () => this.db.pingCheck('database'),
+      () =>
+        this.db.pingCheck('database', {
+          timeout: 3000, // increase timeout here
+        }),
       ...(this.configService.get('app.nodeEnv', { infer: true }) ===
       Environment.DEVELOPMENT
         ? [

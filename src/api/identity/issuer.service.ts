@@ -13,18 +13,14 @@ export class IssuerService {
     private readonly polygonIdService: PolygonIdService,
   ) {}
 
-  // Function to issue a credential
+  // Function to issue a credential with background blockchain processing
   async issueCredential(
     credentialSubject: Record<string, any>,
     type: string,
     credentialSchema: string,
     expiration: number,
   ): Promise<{ data: { credential_id: string } }> {
-    const credentialsList = await this.polygonIdService
-      .getCredentialWallet()
-      .list();
-
-    const isOldStateGenesis = credentialsList.length === 1; // The old state is genesis if there is only one credential in the list
+    const issuerDID = this.polygonIdService.getIssuerDID();
 
     // Create the credential request
     const credentialRequest = {
@@ -38,8 +34,7 @@ export class IssuerService {
       },
     };
 
-    const issuerDID = this.polygonIdService.getIssuerDID();
-
+    // Issue the credential
     const credential = await this.polygonIdService
       .getIdentityWallet()
       .issueCredential(issuerDID, credentialRequest);
@@ -47,35 +42,58 @@ export class IssuerService {
     // Save the credential
     await this.polygonIdService.getCredentialWallet().save(credential);
 
-    // await this.polygonIdService
-    //   .getDataStorage()
-    //   .credential.saveCredential(credential);
+    // Extract the credential ID early to return it
+    const credentialId = credential.id.replace('urn:', '');
 
-    // Add the credential to the Merkle Tree
-    const merkleTreeResult = await this.polygonIdService
-      .getIdentityWallet()
-      .addCredentialsToMerkleTree([credential], issuerDID);
+    // Start blockchain interaction in the background
+    this.processCredentialOnBlockchain(credential, issuerDID).catch((error) => {
+      console.error('Background processing error:', error);
+    });
 
-    // Publish the state to the RHS
-    await this.polygonIdService
-      .getIdentityWallet()
-      .publishRevocationInfoByCredentialStatusType(
-        issuerDID,
-        CredentialStatusType.Iden3ReverseSparseMerkleTreeProof,
-        {
-          rhsUrl: this.configService.getOrThrow('polygonId.rhsUrl', {
-            infer: true,
-          }),
-        },
+    // Return early with the credential ID
+    return {
+      data: {
+        credential_id: credentialId,
+      },
+    };
+  }
+
+  // Background process to handle blockchain interaction
+  private async processCredentialOnBlockchain(
+    credential: W3CCredential,
+    issuerDID: any,
+  ): Promise<void> {
+    try {
+      const credentialsList = await this.polygonIdService
+        .getCredentialWallet()
+        .list();
+
+      const isOldStateGenesis = credentialsList.length === 1;
+
+      // Add the credential to the Merkle Tree
+      const merkleTreeResult = await this.polygonIdService
+        .getIdentityWallet()
+        .addCredentialsToMerkleTree([credential], issuerDID);
+
+      // Publish the state to the RHS
+      await this.polygonIdService
+        .getIdentityWallet()
+        .publishRevocationInfoByCredentialStatusType(
+          issuerDID,
+          CredentialStatusType.Iden3ReverseSparseMerkleTreeProof,
+          {
+            rhsUrl: this.configService.getOrThrow('polygonId.rhsUrl', {
+              infer: true,
+            }),
+          },
+        );
+
+      // Publish the state to the blockchain
+      const ethSigner = new ethers.Wallet(
+        this.configService.getOrThrow('polygonId.walletKey', { infer: true }),
+        this.polygonIdService.getDataStorage().states.getRpcProvider(),
       );
 
-    // Publish the state to the blockchain
-    const ethSigner = new ethers.Wallet(
-      this.configService.getOrThrow('polygonId.walletKey', { infer: true }),
-      this.polygonIdService.getDataStorage().states.getRpcProvider(),
-    );
-
-    try {
       const txId = await this.polygonIdService
         .getProofService()
         .transitState(
@@ -95,22 +113,14 @@ export class IssuerService {
       await this.polygonIdService
         .getCredentialWallet()
         .saveAll(credentialsWithProof);
+
+      console.log('Background blockchain processing completed successfully');
     } catch (error) {
-      console.error('Error while publishing state to the blockchain:', error);
+      console.error('Error in background blockchain processing:', error);
     }
-
-    const credentialId = credential.id.replace('urn:', '');
-
-    return {
-      data: {
-        credential_id: credentialId,
-      },
-    };
   }
 
   // Function to get the fetch request
-  // This is used to create a credential offer that will be sent to the user
-  // The user will then use this offer to fetch the credential from the issuer
   getFetchRequest(id: string, to: string) {
     const requestId = uuidv4();
 

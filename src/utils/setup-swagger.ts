@@ -9,16 +9,20 @@ function setupSwagger(app: INestApplication) {
 
   const config = new DocumentBuilder()
     .setTitle(appName)
-    .setDescription('A boilerplate project')
+    .setDescription('API documentation')
     .setVersion('1.0')
-    .setContact('Company Name', 'https://example.com', 'contact@company.com')
+    .setContact(
+      'Ceavin Rufus',
+      'https://ceavinrufus.me',
+      'ceavin.dev@gmail.com',
+    )
     .addBearerAuth()
     .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')
     .addServer(
       configService.getOrThrow('app.url', { infer: true }),
       'Development',
     )
-    .addServer('https://example.com', 'Staging')
+    .addServer('https://ta-backend-kckp.onrender.com', 'Production')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(`api-docs`, app, document, {
