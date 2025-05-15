@@ -8,10 +8,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class IssuerService {
+  private isOldStateGenesis: boolean;
+
   constructor(
     private readonly configService: ConfigService<AllConfigType>,
     private readonly polygonIdService: PolygonIdService,
-  ) {}
+  ) {
+    this.isOldStateGenesis = true;
+  }
 
   // Function to issue a credential with background blockchain processing
   async issueCredential(
@@ -64,15 +68,6 @@ export class IssuerService {
     issuerDID: any,
   ): Promise<void> {
     try {
-      // Get the current state from the identity's state storage
-      const currentState = await this.polygonIdService
-        .getDataStorage()
-        .states.getLatestStateById(issuerDID.id);
-
-      // If no current state or the state is empty/zero, it's genesis
-      const isOldStateGenesis =
-        !currentState || currentState.state === BigInt(0);
-
       // Add the credential to the Merkle Tree
       const merkleTreeResult = await this.polygonIdService
         .getIdentityWallet()
@@ -102,10 +97,13 @@ export class IssuerService {
         .transitState(
           issuerDID,
           merkleTreeResult.oldTreeState,
-          isOldStateGenesis,
+          this.isOldStateGenesis,
           this.polygonIdService.getDataStorage().states,
           ethSigner,
         );
+
+      // Update the state genesis flag since the state has been published
+      this.isOldStateGenesis = false;
 
       // Generate the Iden3SparseMerkleTreeProof
       const credentialsWithProof = await this.polygonIdService
