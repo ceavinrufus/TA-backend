@@ -10,6 +10,7 @@ import {
 } from '@0xpolygonid/js-sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class PolygonIdService {
@@ -43,6 +44,12 @@ export class PolygonIdService {
     // Initialize the issuer DID
     console.log('=============== Initializing Issuer DID ===============');
 
+    const rawKey = this.configService.getOrThrow('polygonId.walletKey', {
+      infer: true,
+    });
+    const seed = ethers.getBytes(
+      rawKey.startsWith('0x') ? rawKey : `0x${rawKey}`,
+    );
     const { did: issuerDID } = await this.identityWallet.createIdentity({
       method: core.DidMethod.Iden3,
       blockchain: core.Blockchain.Polygon,
@@ -51,6 +58,7 @@ export class PolygonIdService {
         type: CredentialStatusType.Iden3ReverseSparseMerkleTreeProof,
         id: this.configService.getOrThrow('polygonId.rhsUrl', { infer: true }),
       },
+      seed,
     });
 
     console.log('Issuer DID:', issuerDID.string());
