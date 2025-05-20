@@ -44,12 +44,15 @@ export class PolygonIdService {
     // Initialize the issuer DID
     console.log('=============== Initializing Issuer DID ===============');
 
-    const rawKey = this.configService.getOrThrow('polygonId.walletKey', {
+    const walletKey = this.configService.getOrThrow('polygonId.walletKey', {
       infer: true,
     });
-    const seed = ethers.getBytes(
-      rawKey.startsWith('0x') ? rawKey : `0x${rawKey}`,
-    );
+
+    // Generate a key from the wallet key
+    // This key is used to create a seed for creating issuer DID
+    const key = ethers.keccak256(ethers.toUtf8Bytes(walletKey));
+    const seed = ethers.getBytes(key);
+
     const { did: issuerDID } = await this.identityWallet.createIdentity({
       method: core.DidMethod.Iden3,
       blockchain: core.Blockchain.Polygon,

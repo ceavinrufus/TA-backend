@@ -1,13 +1,15 @@
 import { AllConfigType } from '@/config/config.type';
 import { PolygonIdService } from '@/shared/polygon-id/polygon-id.service';
 import { core, CredentialStatusType, W3CCredential } from '@0xpolygonid/js-sdk';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class IssuerService {
+  private readonly logger = new Logger(IssuerService.name);
+
   constructor(
     private readonly configService: ConfigService<AllConfigType>,
     private readonly polygonIdService: PolygonIdService,
@@ -91,13 +93,23 @@ export class IssuerService {
       // Get the identity ID from the issuer DID
       const identityId = core.DID.idFromDID(issuerDID).bigInt();
 
-      // Get the latest state info from the data storage
-      const latestStateInfo = await this.polygonIdService
-        .getDataStorage()
-        .states.getLatestStateById(identityId);
+      let isOldStateGenesis: boolean;
+      try {
+        // Get the latest state info from the data storage
+        const latestStateInfo = await this.polygonIdService
+          .getDataStorage()
+          .states.getLatestStateById(identityId);
 
-      // If there's no info present, then old state is genesis
-      const isOldStateGenesis = !latestStateInfo;
+        // If there's no info present, then old state is genesis
+        isOldStateGenesis = !latestStateInfo;
+      } catch (error) {
+        // If there's an execution revert from smart contract, it means the old state is genesis
+        if (error.message.includes('execution reverted')) {
+          isOldStateGenesis = true;
+        } else {
+          throw new Error(error);
+        }
+      }
 
       // transitState is a method that will be used to publish the state to the blockchain
       const txId = await this.polygonIdService
