@@ -1,6 +1,6 @@
 import { AllConfigType } from '@/config/config.type';
 import { PolygonIdService } from '@/shared/polygon-id/polygon-id.service';
-import { CredentialStatusType, W3CCredential } from '@0xpolygonid/js-sdk';
+import { core, CredentialStatusType, W3CCredential } from '@0xpolygonid/js-sdk';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
@@ -8,14 +8,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class IssuerService {
-  private isOldStateGenesis: boolean;
-
   constructor(
     private readonly configService: ConfigService<AllConfigType>,
     private readonly polygonIdService: PolygonIdService,
-  ) {
-    this.isOldStateGenesis = true;
-  }
+  ) {}
 
   // Function to issue a credential with background blockchain processing
   async issueCredential(
@@ -65,7 +61,7 @@ export class IssuerService {
   // Background process to handle blockchain interaction
   private async processCredentialOnBlockchain(
     credential: W3CCredential,
-    issuerDID: any,
+    issuerDID: core.DID,
   ): Promise<void> {
     try {
       // Add the credential to the Merkle Tree
@@ -92,20 +88,30 @@ export class IssuerService {
         this.polygonIdService.getDataStorage().states.getRpcProvider(),
       );
 
+      // Get the identity ID from the issuer DID
+      const identityId = core.DID.idFromDID(issuerDID).bigInt();
+
+      // Get the latest state info from the data storage
+      const latestStateInfo = await this.polygonIdService
+        .getDataStorage()
+        .states.getLatestStateById(identityId);
+
+      // If there's no info present, then old state is genesis
+      const isOldStateGenesis = !latestStateInfo;
+
+      // transitState is a method that will be used to publish the state to the blockchain
       const txId = await this.polygonIdService
         .getProofService()
         .transitState(
           issuerDID,
           merkleTreeResult.oldTreeState,
-          this.isOldStateGenesis,
+          isOldStateGenesis,
           this.polygonIdService.getDataStorage().states,
           ethSigner,
         );
 
-      // Update the state genesis flag since the state has been published
-      this.isOldStateGenesis = false;
-
-      // Generate the Iden3SparseMerkleTreeProof
+      // Generate the Iden3SparseMerkleTreeProof for the credential
+      // This proof will be used to prove the existence of the credential in the Merkle Tree
       const credentialsWithProof = await this.polygonIdService
         .getIdentityWallet()
         .generateIden3SparseMerkleTreeProof(issuerDID, [credential], txId);
