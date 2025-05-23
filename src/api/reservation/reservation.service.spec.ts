@@ -70,6 +70,7 @@ describe('ReservationService', () => {
     status: ReservationStatus.ORDER_COMPLETED,
     guest_did: 'did:example:1234567890abcdef',
     booking_credential_id: '',
+    cancellation_transaction_hash: '',
     deleted_at: null,
     created_at: new Date(),
     updated_at: new Date(),
@@ -645,7 +646,7 @@ describe('ReservationService', () => {
 
       expect(reservationRepository.findOneOrFail).toHaveBeenCalledWith({
         where: { id: reservationId },
-        relations: ['listing'],
+        relations: ['listing', 'dispute', 'payments'],
       });
       expect(result).toBeInstanceOf(ReservationResDto);
     });
