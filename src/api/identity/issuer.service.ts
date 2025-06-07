@@ -176,25 +176,30 @@ export class IssuerService {
 
   // Function to retrieve and format credential by ID for wallet transmission
   async getCredential(id: string) {
-    const credentialWallet = this.polygonIdService.getCredentialWallet();
-    const credential = await credentialWallet.findById(`urn:${id}`);
+    try {
+      const credentialWallet = this.polygonIdService.getCredentialWallet();
+      const credential = await credentialWallet.findById(`urn:${id}`);
 
-    const serializedCredential = JSON.parse(
-      JSON.stringify(credential, (_, value) =>
-        typeof value === 'bigint' ? value.toString() : value,
-      ),
-    ) as W3CCredential;
+      const serializedCredential = JSON.parse(
+        JSON.stringify(credential, (_, value) =>
+          typeof value === 'bigint' ? value.toString() : value,
+        ),
+      ) as W3CCredential;
 
-    return {
-      id,
-      typ: 'application/iden3comm-plain-json',
-      type: 'https://iden3-communication.io/credentials/1.0/issuance-response',
-      threadID: id,
-      body: {
-        credential: serializedCredential as W3CCredential,
-      },
-      from: this.polygonIdService.getIssuerDID().string(),
-      to: serializedCredential.credentialSubject.id,
-    };
+      return {
+        id,
+        typ: 'application/iden3comm-plain-json',
+        type: 'https://iden3-communication.io/credentials/1.0/issuance-response',
+        threadID: id,
+        body: {
+          credential: serializedCredential as W3CCredential,
+        },
+        from: this.polygonIdService.getIssuerDID().string(),
+        to: serializedCredential.credentialSubject.id,
+      };
+    } catch (error) {
+      this.logger.error(`Error getting credential: ${error.message}`);
+      throw new Error(`Failed to retrieve credential: ${error.message}`);
+    }
   }
 }
